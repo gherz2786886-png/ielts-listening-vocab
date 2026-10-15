@@ -1,0 +1,140 @@
+{
+  "src": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\audio_test.html",
+  "url": "file:///C:/Users/33362/Doubao/chats/2026-10-15/new-chat/ielts-listening-vocab/qa/audio_test.html",
+  "outdir": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\_shots",
+  "include": [
+    "lint",
+    "screenshots",
+    "structure"
+  ],
+  "shots": {
+    "desktop": {
+      "screenshot": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\_shots\\audio_test_desktop.jpg",
+      "screenshotBytes": 48848,
+      "truncated": false,
+      "structure": {
+        "title": "VocabAudio 发音模块测试",
+        "firstH1": "VocabAudio 发音模块测试",
+        "viewport": {
+          "w": 1410,
+          "h": 758
+        },
+        "fullpage": {
+          "w": 1410,
+          "h": 988
+        },
+        "counts": {
+          "section": 0,
+          "h1": 1,
+          "h2": 0,
+          "img": 0,
+          "canvas": 0,
+          "svg": 0,
+          "links": 0,
+          "buttons": 21
+        }
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "horizontalOverflow": [],
+      "resourceErrors": [],
+      "slopFontsWarning": [
+        {
+          "family": "arial",
+          "elementCount": 21,
+          "sampleText": "停止全部播放"
+        }
+      ],
+      "slopFontsHint": "warning · 含义：页面使用了 skill 明确禁的 slop 高发字体（Inter / Roboto / Arial / Fraunces / Playfair）。elementCount 是命中该字体的元素数（不含 fallback），sampleText 是首个样例文字。 | 修法：换成主题相关的字体族（衬线/无衬线/等宽视调性而定），走自托管镜像 miaoda.feishu.cn/fonts/css2。 | 豁免：(1) **用户品牌指定使用**——例如客户 CI 明确要求 Inter/Roboto，写在 brief 里可忽略；(2) **系统字体 fallback 命中**——虽然本规则只取 fontFamily 首选族，但如果这个族本身写的是 \"Arial\"、可能只是保守 fallback；如果同一元素明显还挂了自定义字体但 fallback 落到 Arial（例如自定义字体 404 了），修的其实是字体加载而非字体选型；(3) 极简项目本就要 \"grotesque + 中性感\"，且用户未指定——罕见但存在，看截图和 design plan 确认后可豁免。",
+      "faviconWarning": {
+        "present": false
+      },
+      "faviconHint": "warning · 含义：没有任何 favicon 声明——浏览器 tab、书签、历史记录里显示的是空白默认图标，产物看起来没做完。实测模型原始产物的缺失率 94%。 | 修法：用**内联 SVG data URI**，一行搞定、零额外文件：`<link rel=\"icon\" type=\"image/svg+xml\" href=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F766E'/%3E%3Ctext x='32' y='44' font-size='36' text-anchor='middle' fill='white'%3EA%3C/text%3E%3C/svg%3E\">`。图形取产物主题里的一个符号（首字母、核心图标、品牌形状），配色沿用页面主色，别用无关的通用图标。 | **三个必须注意的编码细节**：外层 href 用双引号、SVG 内部属性用单引号；`<` `>` 写成 `%3C` `%3E`；**颜色的 `#` 必须写成 `%23`**——不编码会被当成 URL fragment，图标直接不显示。想做深浅色两版就写两个 link，加 `media=\"(prefers-color-scheme: dark)\"`。 | 为什么只能用 data URI：`link href` **不在发布链路的资源收集白名单里**（那里只认 `src` 属性和 CSS `url()`），指向 `assets/` 的图标文件发布后必然 404；而且额外文件破坏单文件自包含，用户拿到一个 html 就该能用。 | 会不会被平台图标覆盖：不会。发布平台把自己的默认 favicon 注入在 `<head>` 最前面，浏览器对多个 icon link **取最后一个**，模型写在后面的那个生效。 | 豁免：(1) 产物是页面片段（没有完整 `<head>`）时不适用；(2) externalRefs 指向 CDN 域名（`lf3-static.bytednsdoc.com` 之类）时，那是**发布平台注入的**默认图标，不是你写的——迭代已发布产物时会看到，忽略即可，自己另加一个 data URI 的 link 就行（浏览器对多个 icon link 取最后一个）。",
+      "reportSource": "cdp"
+    }
+  },
+  "engine": "chrome_cli",
+  "chromiumExec": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  "engineDegraded": true,
+  "engineDegradedReason": "playwright 未装",
+  "elapsedSec": 3.28,
+  "schemaVersion": 2,
+  "status": "warning",
+  "engineInfo": {
+    "name": "chrome_cli",
+    "degraded": true,
+    "degradedReasons": [
+      "playwright 未装"
+    ]
+  },
+  "input": {
+    "original": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\audio_test.html",
+    "resolvedPath": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\audio_test.html",
+    "baseUrl": "file:///C:/Users/33362/Doubao/chats/2026-10-15/new-chat/ielts-listening-vocab/qa/audio_test.html",
+    "protocol": "file",
+    "cwd": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat",
+    "mediaMode": {
+      "reducedMotion": true
+    }
+  },
+  "artifacts": {
+    "screenshots": [
+      {
+        "viewport": "desktop",
+        "path": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\_shots\\audio_test_desktop.jpg",
+        "size": 48848,
+        "visualCoverage": {
+          "complete": true,
+          "reason": null
+        }
+      }
+    ]
+  },
+  "summary": {
+    "blocker": 0,
+    "error": 0,
+    "warning": 2,
+    "info": 0
+  },
+  "findings": [
+    {
+      "ruleId": "slopFontsWarning",
+      "severity": "warning",
+      "kind": "typography",
+      "viewport": "desktop",
+      "selector": null,
+      "evidence": {
+        "family": "arial",
+        "elementCount": 21,
+        "sampleText": "停止全部播放"
+      },
+      "dedupeKey": "slopFontsWarning|desktop||0"
+    },
+    {
+      "ruleId": "faviconWarning",
+      "severity": "warning",
+      "kind": "metadata",
+      "viewport": "desktop",
+      "selector": null,
+      "evidence": {
+        "present": false
+      },
+      "dedupeKey": "faviconWarning|desktop||0"
+    }
+  ],
+  "prioritizedActions": [
+    {
+      "ruleId": "slopFontsWarning",
+      "severity": "warning",
+      "viewport": "desktop",
+      "selector": null
+    },
+    {
+      "ruleId": "faviconWarning",
+      "severity": "warning",
+      "viewport": "desktop",
+      "selector": null
+    }
+  ],
+  "reportPath": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\_shots\\report.json"
+}

@@ -1,0 +1,207 @@
+{
+  "src": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\index.html",
+  "url": "file:///C:/Users/33362/Doubao/chats/2026-10-15/new-chat/ielts-listening-vocab/index.html",
+  "outdir": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\summary",
+  "include": [
+    "lint",
+    "screenshots",
+    "structure"
+  ],
+  "shots": {
+    "desktop": {
+      "revealed": 0,
+      "eval": {
+        "executed": true,
+        "result": {
+          "stats": [
+            "0",
+            "0",
+            "1"
+          ],
+          "buttons": [
+            "再来一轮",
+            "返回学习",
+            "查看错词本"
+          ]
+        }
+      },
+      "screenshot": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\summary\\index_desktop.jpg",
+      "screenshotBytes": 15926,
+      "truncated": false,
+      "structure": {
+        "title": "雅思听力场景词汇",
+        "firstH1": "",
+        "viewport": {
+          "w": 1440,
+          "h": 900
+        },
+        "fullpage": {
+          "w": 1440,
+          "h": 900
+        },
+        "counts": {
+          "section": 0,
+          "h1": 0,
+          "h2": 1,
+          "img": 0,
+          "canvas": 0,
+          "svg": 0,
+          "links": 6,
+          "buttons": 1
+        }
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "horizontalOverflow": [],
+      "resourceErrors": [],
+      "slopFontsWarning": [
+        {
+          "family": "arial",
+          "elementCount": 1,
+          "sampleText": "再来一轮"
+        }
+      ],
+      "slopFontsHint": "warning · 含义：页面使用了 skill 明确禁的 slop 高发字体（Inter / Roboto / Arial / Fraunces / Playfair）。elementCount 是命中该字体的元素数（不含 fallback），sampleText 是首个样例文字。 | 修法：换成主题相关的字体族（衬线/无衬线/等宽视调性而定），走自托管镜像 miaoda.feishu.cn/fonts/css2。 | 豁免：(1) **用户品牌指定使用**——例如客户 CI 明确要求 Inter/Roboto，写在 brief 里可忽略；(2) **系统字体 fallback 命中**——虽然本规则只取 fontFamily 首选族，但如果这个族本身写的是 \"Arial\"、可能只是保守 fallback；如果同一元素明显还挂了自定义字体但 fallback 落到 Arial（例如自定义字体 404 了），修的其实是字体加载而非字体选型；(3) 极简项目本就要 \"grotesque + 中性感\"，且用户未指定——罕见但存在，看截图和 design plan 确认后可豁免。"
+    },
+    "mobile": {
+      "revealed": 0,
+      "eval": {
+        "executed": true,
+        "result": {
+          "stats": [
+            "0",
+            "0",
+            "0"
+          ],
+          "buttons": [
+            "再来一轮",
+            "返回学习",
+            "查看错词本"
+          ]
+        }
+      },
+      "screenshot": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\summary\\index_mobile.jpg",
+      "screenshotBytes": 19288,
+      "truncated": false,
+      "structure": {
+        "title": "雅思听力场景词汇",
+        "firstH1": "",
+        "viewport": {
+          "w": 390,
+          "h": 844
+        },
+        "fullpage": {
+          "w": 390,
+          "h": 844
+        },
+        "counts": {
+          "section": 0,
+          "h1": 0,
+          "h2": 1,
+          "img": 0,
+          "canvas": 0,
+          "svg": 0,
+          "links": 6,
+          "buttons": 1
+        }
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "horizontalOverflow": [],
+      "resourceErrors": [],
+      "slopFontsWarning": [
+        {
+          "family": "arial",
+          "elementCount": 1,
+          "sampleText": "再来一轮"
+        }
+      ],
+      "slopFontsHint": "warning · 含义：页面使用了 skill 明确禁的 slop 高发字体（Inter / Roboto / Arial / Fraunces / Playfair）。elementCount 是命中该字体的元素数（不含 fallback），sampleText 是首个样例文字。 | 修法：换成主题相关的字体族（衬线/无衬线/等宽视调性而定），走自托管镜像 miaoda.feishu.cn/fonts/css2。 | 豁免：(1) **用户品牌指定使用**——例如客户 CI 明确要求 Inter/Roboto，写在 brief 里可忽略；(2) **系统字体 fallback 命中**——虽然本规则只取 fontFamily 首选族，但如果这个族本身写的是 \"Arial\"、可能只是保守 fallback；如果同一元素明显还挂了自定义字体但 fallback 落到 Arial（例如自定义字体 404 了），修的其实是字体加载而非字体选型；(3) 极简项目本就要 \"grotesque + 中性感\"，且用户未指定——罕见但存在，看截图和 design plan 确认后可豁免。"
+    }
+  },
+  "engine": "playwright",
+  "chromiumExec": "(playwright default)",
+  "elapsedSec": 10.09,
+  "schemaVersion": 2,
+  "status": "warning",
+  "engineInfo": {
+    "name": "playwright",
+    "degraded": false,
+    "degradedReasons": []
+  },
+  "input": {
+    "original": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\index.html",
+    "resolvedPath": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\index.html",
+    "baseUrl": "file:///C:/Users/33362/Doubao/chats/2026-10-15/new-chat/ielts-listening-vocab/index.html",
+    "protocol": "file",
+    "cwd": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat",
+    "mediaMode": {
+      "reducedMotion": true
+    }
+  },
+  "artifacts": {
+    "screenshots": [
+      {
+        "viewport": "desktop",
+        "path": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\summary\\index_desktop.jpg",
+        "size": 15926,
+        "visualCoverage": {
+          "complete": true,
+          "reason": null
+        }
+      },
+      {
+        "viewport": "mobile",
+        "path": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\summary\\index_mobile.jpg",
+        "size": 19288,
+        "visualCoverage": {
+          "complete": true,
+          "reason": null
+        }
+      }
+    ]
+  },
+  "summary": {
+    "blocker": 0,
+    "error": 0,
+    "warning": 2,
+    "info": 0
+  },
+  "findings": [
+    {
+      "ruleId": "slopFontsWarning",
+      "severity": "warning",
+      "kind": "typography",
+      "viewport": "desktop",
+      "selector": null,
+      "evidence": {
+        "family": "arial",
+        "elementCount": 1,
+        "sampleText": "再来一轮"
+      },
+      "dedupeKey": "slopFontsWarning|desktop||0"
+    },
+    {
+      "ruleId": "slopFontsWarning",
+      "severity": "warning",
+      "kind": "typography",
+      "viewport": "mobile",
+      "selector": null,
+      "evidence": {
+        "family": "arial",
+        "elementCount": 1,
+        "sampleText": "再来一轮"
+      },
+      "dedupeKey": "slopFontsWarning|mobile||0"
+    }
+  ],
+  "prioritizedActions": [
+    {
+      "ruleId": "slopFontsWarning",
+      "severity": "warning",
+      "viewport": "desktop",
+      "selector": null
+    }
+  ],
+  "reportPath": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\summary\\report.json"
+}

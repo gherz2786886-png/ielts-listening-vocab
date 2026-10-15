@@ -1,0 +1,17 @@
+# 操作系统
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# 日志
+*.log
+
+# 编辑器临时文件
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# 依赖目录（本项目无构建，此处仅作占位）
+node_modules/

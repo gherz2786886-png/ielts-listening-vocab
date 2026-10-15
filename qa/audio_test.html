@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VocabAudio 发音模块测试</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --border: #e3e6ea;
+    --text: #1f2329;
+    --muted: #6b7280;
+    --uk: #2563eb;
+    --us: #059669;
+    --playing: #f59e0b;
+    --fallback: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px;
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.5;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+  .meta {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin-bottom: 16px; font-size: 13px;
+  }
+  .meta b { color: var(--text); }
+  .word-row {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin-bottom: 8px;
+  }
+  .word { flex: 0 0 180px; font-weight: 600; font-size: 15px; }
+  .word .ph { display: block; font-weight: 400; font-size: 11px; color: var(--muted); }
+  button {
+    border: 1px solid var(--border); background: #fff; color: var(--text);
+    padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px;
+    transition: all .15s;
+  }
+  button:hover { border-color: #9ca3af; }
+  button.uk { border-color: var(--uk); color: var(--uk); }
+  button.us { border-color: var(--us); color: var(--us); }
+  button.playing {
+    background: var(--playing); border-color: var(--playing); color: #fff;
+    box-shadow: 0 0 0 3px rgba(245,158,11,.25);
+  }
+  .status { flex: 1; font-size: 12px; color: var(--muted); min-width: 0; }
+  .status .fb { color: var(--fallback); font-weight: 600; }
+  .status .ok { color: var(--us); }
+  .log-wrap {
+    margin-top: 18px; background: #1f2329; color: #d1d5db;
+    border-radius: 8px; padding: 12px 14px; font-family: Consolas, monospace;
+    font-size: 12px; max-height: 260px; overflow-y: auto;
+  }
+  .log-wrap h3 { margin: 0 0 8px; color: #9ca3af; font-size: 12px; font-weight: 600; }
+  .log-line { white-space: pre-wrap; word-break: break-all; padding: 1px 0; }
+  .log-line .t { color: #6b7280; }
+  .toolbar { margin-bottom: 12px; }
+  .toolbar button { background: #1f2329; color: #fff; border: none; }
+</style>
+</head>
+<body>
+  <h1>VocabAudio 发音模块测试</h1>
+  <div class="sub">file:// 双击可开 · 有道真人发音（主）→ speechSynthesis（回退）· 全局单通道</div>
+
+  <div class="meta" id="meta">能力探测中…</div>
+
+  <div class="toolbar">
+    <button id="stopAll">停止全部播放</button>
+  </div>
+
+  <div id="rows"></div>
+
+  <div class="log-wrap">
+    <h3>事件日志</h3>
+    <div id="log"></div>
+  </div>
+
+<script src="../js/audio.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var WORDS = [
+    { w: 'adults', ph: '/ˈædʌlts/' },
+    { w: 'gender', ph: '/ˈdʒendər/' },
+    { w: 'full-time job', ph: '短语' },
+    { w: 'dormitory', ph: '/ˈdɔːmɪtəri/' },
+    { w: 'semester', ph: '/sɪˈmestər/' },
+    { w: 'recipe', ph: '/ˈresəpi/' },
+    { w: 'schedule', ph: '/ˈʃedjuːl/' },
+    { w: 'advertisement', ph: '/ədˈvɜːtɪsmənt/' },
+    { w: 'vitamin', ph: '/ˈvɪtəmɪn/' },
+    { w: 'cheque', ph: '/tʃek/' }
+  ];
+
+  var rowsEl = document.getElementById('rows');
+  var logEl = document.getElementById('log');
+  var metaEl = document.getElementById('meta');
+
+  // 能力探测
+  var sup = window.VocabAudio.supported();
+  metaEl.innerHTML =
+    '在线 Audio：<b>' + (sup.onlineAudio ? '支持' : '不支持') + '</b> · ' +
+    'TTS speechSynthesis：<b>' + (sup.tts ? '支持' : '不支持') + '</b> · ' +
+    '当前：<b id="now">空闲</b>';
+
+  function log(msg, cls) {
+    var d = document.createElement('div');
+    d.className = 'log-line';
+    var t = new Date().toLocaleTimeString();
+    d.innerHTML = '<span class="t">[' + t + ']</span> ' +
+      (cls ? '<span style="color:' + cls + '">' + msg + '</span>' : msg);
+    logEl.insertBefore(d, logEl.firstChild);
+  }
+
+  // 渲染词行
+  WORDS.forEach(function (item) {
+    var row = document.createElement('div');
+    row.className = 'word-row';
+    row.innerHTML =
+      '<div class="word">' + item.w + '<span class="ph">' + item.ph + '</span></div>' +
+      '<button class="uk" data-w="' + item.w + '" data-a="uk">英音</button>' +
+      '<button class="us" data-w="' + item.w + '" data-a="us">美音</button>' +
+      '<div class="status" id="st-' + encodeURIComponent(item.w) + '">就绪</div>';
+    rowsEl.appendChild(row);
+  });
+
+  function setStatus(word, text, isFb, ok) {
+    var el = document.getElementById('st-' + encodeURIComponent(word));
+    if (!el) return;
+    if (isFb) el.innerHTML = '<span class="fb">' + text + '</span>';
+    else if (ok) el.innerHTML = '<span class="ok">' + text + '</span>';
+    else el.textContent = text;
+  }
+
+  // 点击播放
+  rowsEl.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-w]');
+    if (!btn) return;
+    var word = btn.getAttribute('data-w');
+    var accent = btn.getAttribute('data-a');
+    log('点击播放：' + word + ' [' + accent + ']');
+
+    // 清掉其他按钮高亮
+    document.querySelectorAll('button.playing').forEach(function (b) {
+      b.classList.remove('playing');
+    });
+    btn.classList.add('playing');
+    setStatus(word, '播放中…');
+
+    window.VocabAudio.play(word, accent, {
+      onEnd: function () {
+        btn.classList.remove('playing');
+        setStatus(word, '播放结束', false, true);
+        log('结束：' + word);
+      },
+      onError: function (err) {
+        btn.classList.remove('playing');
+        setStatus(word, '失败：' + (err && err.message || err));
+        log('错误：' + word + ' — ' + (err && err.message || err), '#fca5a5');
+      },
+      onFallback: function (reason) {
+        setStatus(word, '回退 TTS（' + reason + '）', true);
+        log('回退：' + word + ' 原因=' + reason, '#fca5a5');
+      }
+    }).catch(function () {});
+  });
+
+  // 停止全部
+  document.getElementById('stopAll').addEventListener('click', function () {
+    window.VocabAudio.stop();
+    document.querySelectorAll('button.playing').forEach(function (b) {
+      b.classList.remove('playing');
+    });
+    log('手动停止全部');
+  });
+
+  // 全局状态事件
+  document.addEventListener('vocab-audio-state', function (ev) {
+    var d = ev.detail;
+    var nowEl = document.getElementById('now');
+    if (d.playing) {
+      nowEl.textContent = '播放中：' + d.text + ' [' + d.accent + ']';
+    } else {
+      nowEl.textContent = '空闲';
+    }
+  });
+
+  log('测试页加载完成。共 ' + WORDS.length + ' 个词。');
+})();
+</script>
+</body>
+</html>

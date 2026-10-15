@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dictation 听写批改引擎 · 自测页</title>
+<style>
+  :root {
+    --ok: #16a34a; --bad: #dc2626; --muted: #64748b;
+    --border: #e2e8f0; --bg: #f8fafc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    margin: 0; padding: 24px; background: var(--bg); color: #0f172a;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+  #summary {
+    position: sticky; top: 0; z-index: 10;
+    padding: 12px 16px; border-radius: 10px; margin-bottom: 16px;
+    font-weight: 600; font-size: 15px; border: 1px solid var(--border); background: #fff;
+    display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+  }
+  #summary.all-ok { background: #f0fdf4; border-color: #bbf7d0; color: var(--ok); }
+  #summary.has-fail { background: #fef2f2; border-color: #fecaca; color: var(--bad); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 12px; }
+  .card {
+    background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+  }
+  .card.pass { border-left: 4px solid var(--ok); }
+  .card.fail { border-left: 4px solid var(--bad); }
+  .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .card-name { font-weight: 600; font-size: 14px; }
+  .cat { font-size: 11px; color: var(--muted); background: #f1f5f9; border-radius: 999px; padding: 2px 8px; margin-left: 6px; }
+  .badge { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 2px 10px; }
+  .badge.pass { background: #dcfce7; color: var(--ok); }
+  .badge.fail { background: #fee2e2; color: var(--bad); }
+  .row { font-size: 13px; margin: 3px 0; color: #334155; }
+  .row b { color: #0f172a; }
+  .align {
+    font-family: Consolas, "Courier New", monospace; font-size: 16px; letter-spacing: 1px;
+    background: #f8fafc; border: 1px dashed var(--border); border-radius: 6px;
+    padding: 8px 10px; margin: 6px 0; min-height: 20px;
+  }
+  .verdict { font-size: 13px; margin: 4px 0; }
+  .verdict .ok { color: var(--ok); font-weight: 700; }
+  .verdict .no { color: var(--bad); font-weight: 700; }
+  .reason { font-size: 13px; color: #7c2d12; background: #fff7ed; border-radius: 6px; padding: 6px 8px; margin-top: 6px; }
+  .kinds { margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap; }
+  .kind { font-size: 11px; color: #475569; background: #f1f5f9; border-radius: 4px; padding: 1px 6px; }
+  /* ===== 高亮配色契约（与 js 渲染的 class 对应） ===== */
+  .dl-sub   { background: #fecaca; color: #991b1b; border-radius: 3px; padding: 0 2px; } /* 红：写错字母 */
+  .dl-del   { background: #fed7aa; color: #9a3412; border-radius: 3px; padding: 0 2px; } /* 橙：漏写占位 */
+  .dl-ins   { background: #bfdbfe; color: #1e40af; border-radius: 3px; padding: 0 2px; } /* 蓝：多写 */
+  .dl-trans { background: #e9d5ff; color: #6b21a8; border-radius: 3px; padding: 0 2px; } /* 紫：颠倒 */
+  .dl-case, .dl-space, .dl-punct { background: #e2e8f0; color: #475569; border-radius: 3px; padding: 0 2px; } /* 灰：格式 */
+  .dl-ukus  { background: #a5f3fc; color: #155e75; border-radius: 3px; padding: 0 2px; } /* 青：英美变体 */
+  table.legend { margin-top: 16px; border-collapse: collapse; font-size: 12px; color: var(--muted); }
+  table.legend td { border: 1px solid var(--border); padding: 4px 10px; background: #fff; }
+</style>
+</head>
+<body>
+
+<h1>雅思听写批改引擎 · 自测页</h1>
+<div class="sub">纯本地确定性算法（Damerau–Levenshtein 对齐 + 有限规则表），无任何外部 API。本页案例全部自动断言。</div>
+
+<div id="summary">运行中…</div>
+<div class="grid" id="grid"></div>
+
+<table class="legend">
+  <tr><td><span class="dl-sub">红</span> 写错字母 sub</td><td><span class="dl-del">橙<u>X</u></span> 漏写占位 del</td><td><span class="dl-ins">蓝</span> 多写 ins</td><td><span class="dl-trans">紫</span> 顺序颠倒 trans</td><td><span class="dl-case">灰</span> 大小写/空格/连字符</td><td><span class="dl-ukus">青</span> 英美变体 ukus</td></tr>
+</table>
+
+<script src="../js/dictation.js"></script>
+<script>
+(function () {
+  'use strict';
+  if (!window.Dictation) {
+    document.getElementById('summary').textContent = '错误：未加载 ../js/dictation.js';
+    return;
+  }
+  var D = window.Dictation;
+
+  /* ===== 预设案例：每条都带期望断言 ===== */
+  var CASES = [
+    { name: '完全正确', cat: '正确', input: 'adults', answer: 'adults',
+      expect: { accepted: true, exact: true, reasonIncludes: '拼写正确', kindsInclude: [] } },
+
+    { name: '漏写→应双写 m', cat: '双写', input: 'accomodate', answer: 'accommodate',
+      expect: { accepted: false, kindsInclude: ['del', 'double'], reasonIncludes: '应双写' } },
+
+    { name: '相邻颠倒 freinds', cat: '换位', input: 'freinds', answer: 'friends',
+      expect: { accepted: false, kindsInclude: ['trans'], reasonIncludes: '顺序颠倒' } },
+
+    { name: '漏写单个元音 e', cat: '漏写', input: 'ned', answer: 'need',
+      expect: { accepted: false, kindsExclude: ['double'], reasonIncludes: '漏写了字母 e' } },
+
+    { name: 't 写成 d', cat: '错写', input: 'dormidory', answer: 'dormitory',
+      expect: { accepted: false, reasonIncludes: '把 t 写成了 d' } },
+
+    { name: 'u 写成 o', cat: '错写', input: 'bocket', answer: 'bucket',
+      expect: { accepted: false, reasonIncludes: '把 u 写成了 o' } },
+
+    { name: '多写一个 l', cat: '多写/双写', input: 'untill', answer: 'until',
+      expect: { accepted: false, kindsInclude: ['ins', 'double'], reasonIncludes: '多写了一个 l' } },
+
+    { name: 'teh 颠倒', cat: '换位', input: 'teh', answer: 'the',
+      expect: { accepted: false, kindsInclude: ['trans'] } },
+
+    { name: 'p 应双写', cat: '双写', input: 'stoped', answer: 'stopped',
+      expect: { accepted: false, kindsInclude: ['double'], reasonIncludes: '字母 p 应双写' } },
+
+    { name: 'n 应双写', cat: '双写', input: 'begining', answer: 'beginning',
+      expect: { accepted: false, kindsInclude: ['double'], reasonIncludes: '字母 n 应双写' } },
+
+    { name: '后缀 -er/-or', cat: '后缀', input: 'acter', answer: 'actor',
+      expect: { accepted: false, kindsInclude: ['suffix'], reasonIncludes: '后缀混淆' } },
+
+    { name: '后缀 collecter', cat: '后缀', input: 'collecter', answer: 'collector',
+      expect: { accepted: false, kindsInclude: ['suffix'] } },
+
+    { name: '英美 -our/-or', cat: '英美(判对)', input: 'colour', answer: 'color',
+      expect: { accepted: true, exact: false, kindsInclude: ['ukus'], reasonIncludes: '两种拼写都算对' } },
+
+    { name: '英美 -ise/-ize', cat: '英美(判对)', input: 'organise', answer: 'organize',
+      expect: { accepted: true, kindsInclude: ['ukus'] } },
+
+    { name: '英美 -que/-ck', cat: '英美(判对)', input: 'cheque', answer: 'check',
+      expect: { accepted: true, kindsInclude: ['ukus'] } },
+
+    { name: '英美 -re/-er', cat: '英美(判对)', input: 'centre', answer: 'center',
+      expect: { accepted: true, kindsInclude: ['ukus'] } },
+
+    { name: '英美 -ll-/-l-', cat: '英美(判对)', input: 'travelling', answer: 'traveling',
+      expect: { accepted: true, kindsInclude: ['ukus'] } },
+
+    { name: '不发音 k (kn-)', cat: '不发音', input: 'nife', answer: 'knife',
+      expect: { accepted: false, kindsInclude: ['del', 'silent'], reasonIncludes: '不发音字母 k' } },
+
+    { name: '不发音 b (-mb)', cat: '不发音', input: 'clime', answer: 'climb',
+      expect: { accepted: false, kindsInclude: ['silent'], reasonIncludes: '不发音字母 b' } },
+
+    { name: '空格+连字符格式判对', cat: '格式', input: ' full time ', answer: 'full-time',
+      expect: { accepted: true, exact: false, kindsInclude: ['punct'] } },
+
+    { name: '大小写格式判对', cat: '格式', input: 'ADULTS', answer: 'adults',
+      expect: { accepted: true, exact: false, kindsInclude: ['case'] } },
+
+    { name: '多余空格折叠', cat: '短语', input: '  day   shift ', answer: 'day shift',
+      expect: { accepted: true, kindsInclude: ['space'] } },
+
+    { name: '漏空格短语判对', cat: '短语', input: 'dayshift', answer: 'day shift',
+      expect: { accepted: true, kindsInclude: ['space'] } },
+
+    { name: '连续漏写 i、n', cat: '漏写', input: 'admistration', answer: 'administration',
+      expect: { accepted: false, kindsInclude: ['del'] } }
+  ];
+
+  /* ===== 断言引擎 ===== */
+  function assertCase(c) {
+    var res = D.check(c.input, c.answer);
+    var e = c.expect;
+    var checks = [];
+    function chk(name, ok, actual) { checks.push({ name: name, ok: ok, actual: actual }); }
+
+    chk('accepted=' + e.accepted, res.accepted === e.accepted, String(res.accepted));
+    if (e.exact !== undefined) chk('exact=' + e.exact, res.exact === e.exact, String(res.exact));
+    if (e.reasonIncludes) chk('reason 含「' + e.reasonIncludes + '」',
+      res.reasonCn.indexOf(e.reasonIncludes) >= 0, res.reasonCn);
+    var codes = res.errorKinds.map(function (k) { return k.code; });
+    (e.kindsInclude || []).forEach(function (code) {
+      chk('类别含 ' + code, codes.indexOf(code) >= 0, codes.join(','));
+    });
+    (e.kindsExclude || []).forEach(function (code) {
+      chk('类别不含 ' + code, codes.indexOf(code) < 0, codes.join(','));
+    });
+    var pass = checks.every(function (x) { return x.ok; });
+    return { res: res, checks: checks, pass: pass };
+  }
+
+  /* ===== 渲染 ===== */
+  var grid = document.getElementById('grid');
+  var passCount = 0;
+  CASES.forEach(function (c, idx) {
+    var r = assertCase(c);
+    if (r.pass) passCount++;
+    var res = r.res;
+    var card = document.createElement('div');
+    card.className = 'card ' + (r.pass ? 'pass' : 'fail');
+    var checksHtml = r.checks.map(function (x) {
+      return '<div class="row">· <span class="' + (x.ok ? 'ok' : 'no') + '">' +
+        (x.ok ? '✓' : '✗') + '</span> ' + x.name + '</div>';
+    }).join('');
+    card.innerHTML =
+      '<div class="card-head">' +
+        '<span class="card-name">#' + (idx + 1) + ' ' + c.name +
+          '<span class="cat">' + c.cat + '</span></span>' +
+        '<span class="badge ' + (r.pass ? 'pass' : 'fail') + '">' + (r.pass ? 'PASS' : 'FAIL') + '</span>' +
+      '</div>' +
+      '<div class="row">所填：<b>' + escapeHtml(c.input) + '</b></div>' +
+      '<div class="row">答案：<b>' + escapeHtml(c.answer) + '</b></div>' +
+      '<div class="align">' + res.highlightHtml + '</div>' +
+      '<div class="verdict">判分：' +
+        (res.accepted ? '<span class="ok">accepted ✓</span>' : '<span class="no">accepted ✗</span>') +
+        '　' +
+        (res.exact ? '<span class="ok">exact ✓</span>' : '<span class="no">exact ✗</span>') +
+      '</div>' +
+      '<div class="reason">原因：' + escapeHtml(res.reasonCn) + '</div>' +
+      '<div class="kinds">' + res.errorKinds.map(function (k) {
+        return '<span class="kind">' + k.code + '·' + k.labelCn + '</span>';
+      }).join('') + '</div>' +
+      '<details style="margin-top:6px;font-size:12px;color:#64748b;"><summary>断言明细</summary>' +
+        checksHtml + '</details>';
+    grid.appendChild(card);
+  });
+
+  var sum = document.getElementById('summary');
+  var total = CASES.length;
+  var allOk = passCount === total;
+  sum.className = allOk ? 'all-ok' : 'has-fail';
+  sum.innerHTML = '用例通过：<b>' + passCount + ' / ' + total + '</b>' +
+    (allOk ? '　✅ 全部通过' : '　❌ 存在失败') +
+    '<span style="font-weight:400;color:#64748b;font-size:12px">（刷新页面即重新运行；双击本文件可用 file:// 打开）</span>';
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+})();
+</script>
+</body>
+</html>
