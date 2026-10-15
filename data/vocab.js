@@ -976,7 +976,7 @@ window.VOCAB = {
       "headwords": [
         "reasonable price"
       ],
-      "meaning": "合理理的价格",
+      "meaning": "合理的价格",
       "ipaUk": "/ˌri: .zən.ə.bəl ˈpraɪs/",
       "ipaUs": "/ˈri: zənəbəl ˈpraɪs/"
     },
@@ -1567,7 +1567,7 @@ window.VOCAB = {
       "headwords": [
         "frozen"
       ],
-      "meaning": "冰冻冻的",
+      "meaning": "冰冻的",
       "ipaUk": "/ˈfrəʊ.zən/",
       "ipaUs": "/ˈfroʊ.zən/"
     },
@@ -1582,7 +1582,7 @@ window.VOCAB = {
         "television",
         "TV"
       ],
-      "meaning": "电视视机",
+      "meaning": "电视机",
       "ipaUk": "/ˈtel.ɪ.vɪʒ.ən//ˌti: ˈvi: /",
       "ipaUs": "/ˈtel.ə.vɪʒ.ən//ˌti: ˈvi: /"
     },
@@ -2204,7 +2204,7 @@ window.VOCAB = {
       "headwords": [
         "combination"
       ],
-      "meaning": "组合合;合作; 联合体",
+      "meaning": "组合;合作; 联合体",
       "ipaUk": "/ˌkɒmbɪ'neɪʃn/",
       "ipaUs": "/ˌkɑ: mbɪ'neɪʃn/"
     },
@@ -8276,7 +8276,7 @@ window.VOCAB = {
       "headwords": [
         "teamwork"
       ],
-      "meaning": "团队合合作",
+      "meaning": "团队合作",
       "ipaUk": "/ˈti: m.wɜ: k/",
       "ipaUs": "/ˈti: m.wɝ: k/"
     },
@@ -8850,7 +8850,7 @@ window.VOCAB = {
       "headwords": [
         "laptop"
       ],
-      "meaning": "笔记本本电脑(便携式)",
+      "meaning": "笔记本电脑(便携式)",
       "ipaUk": "/ˈlæptɒp/",
       "ipaUs": "/ˈlæptɑ: p/"
     },
@@ -8864,7 +8864,7 @@ window.VOCAB = {
       "headwords": [
         "projector"
       ],
-      "meaning": "投影仪仪；放映机",
+      "meaning": "投影仪；放映机",
       "ipaUk": "/prəˈdʒektə(r)/",
       "ipaUs": "/prəˈdʒektər/"
     },
@@ -9286,7 +9286,7 @@ window.VOCAB = {
       "headwords": [
         "oral"
       ],
-      "meaning": "口头的的；口述的",
+      "meaning": "口头的；口述的",
       "ipaUk": "/ˈɔ: .rəl/",
       "ipaUs": "/ˈɔ: r.əl/"
     },
@@ -12305,7 +12305,7 @@ window.VOCAB = {
       "headwords": [
         "symbolism"
       ],
-      "meaning": "象征主主义",
+      "meaning": "象征主义",
       "ipaUk": "/ˈsɪm.bə.lɪ.zəm/",
       "ipaUs": "/ˈsɪm.bə.lɪ.zəm/"
     },
@@ -13300,7 +13300,7 @@ window.VOCAB = {
       "headwords": [
         "thermometer"
       ],
-      "meaning": "温度计计；体温计",
+      "meaning": "温度计；体温计",
       "ipaUk": "/θəˈmɒm.ɪ.tər/",
       "ipaUs": "/thər-ˈmä-mə-tər/"
     },

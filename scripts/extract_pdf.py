@@ -143,7 +143,9 @@ def parse_row(page, row):
         # 中文尾段塞进释义序列最前面
         raw.insert(wi + 1, cjk_tail)
 
-    # 释义: 其后连续中文格; 前后缀重叠则合并
+    # 释义: 其后连续中文格。同一释义格在表格线处被切成相邻单元格时,
+    # 边界字符(如"合理|理的价格"的"理")会被两侧 clip 各收录一次,
+    # 因此按"joined 后缀 == cs 前缀"的最长重叠去除后再拼接。
     meaning_parts = []
     j = wi + 1
     while j < len(raw):
@@ -155,14 +157,11 @@ def parse_row(page, row):
             joined = "".join(meaning_parts)
             if not joined:
                 meaning_parts.append(cs)
-            elif joined.endswith(cs) or cs.endswith(joined):
-                meaning_parts = [max(joined, cs, key=len)]
-            elif cs.startswith(joined):
-                meaning_parts = [cs]
-            elif joined.startswith(cs):
-                pass
             else:
-                meaning_parts.append(cs)
+                k = min(len(joined), len(cs))
+                while k > 0 and not joined.endswith(cs[:k]):
+                    k -= 1
+                meaning_parts = [joined + cs[k:]]
             j += 1
         else:
             break
