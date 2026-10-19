@@ -33,6 +33,11 @@ const cases = [
   ['£1.01', 'digits', 'one pound and one penny'],
   ['33 dollars', 'digits', 'thirty-three dollars'], ['10 weeks', 'digits', 'ten weeks'],
   ['42A', 'digits', '42A'], // context-free alphanumeric codes are not silently guessed
+  ['18%', 'digits', 'eighteen percent'], ['0.1cm', 'digits', 'zero point one centimetres'],
+  ['168 cm', 'digits', 'one hundred and sixty-eight centimetres'],
+  ['1.5 million', 'digits', 'one point five million'], ['2 adults', 'digits', 'two adults'],
+  ['9:50', 'digits', 'nine fifty'], ['2.30 pm', 'digits', 'two thirty p m'],
+  ['11.15am', 'digits', 'eleven fifteen a m'],
   ['back door', 'digits', 'back door'], ['North', 'digits', 'North']
 ];
 let count = 0;
@@ -56,11 +61,34 @@ for (const [input, item, expected] of [
   count++;
 }
 const data = sandbox.JIJING;
-assert.deepEqual(Array.from(data.days, day => [day.day, day.items.length]), [[28, 40], [29, 38], [30, 32]]);
+assert.deepEqual(Array.from(data.days.slice(0, 3), day => [day.day, day.items.length]), [[28, 40], [29, 38], [30, 32]]);
 const ids = data.days.flatMap(day => day.items.map(item => item.id));
-assert.equal(new Set(ids).size, 110);
+assert.equal(new Set(ids).size, 3018);
 assert.equal(data.days[1].items.filter(item => item.answer === 'passport').length, 2);
 assert.equal(data.days[1].items.some(item => item.answer === 'feedback'), true);
 assert.equal(data.days[2].items.some(item => item.answer === '10 weeks'), true);
 assert.equal(data.days[0].items.some(item => item.answer === '33'), false, 'Demo must not invent a source answer');
-console.log('PASS ' + count + ' reading/grading cases and 6 source-data assertions');
+assert.deepEqual(Array.from(data.days, day => day.day), Array.from({length: 74}, (_, i) => 28 + i));
+assert.equal(data.collections.length, 161);
+assert.equal(data.collections.reduce((n, group) => n + group.items.length, 0), 3553);
+assert.equal(data.days.filter(day => day.status === 'practice').length, 27);
+assert.equal(data.days.filter(day => day.status === 'video').length, 27);
+assert.deepEqual(Array.from(data.days.find(day => day.day === 91).groups), ['11.6', '11.11', '11.20', '11.27']);
+assert.deepEqual(Array.from(data.days.find(day => day.day === 101).groups), ['4.23', '4.30']);
+const all = data.days.concat(data.collections).flatMap(day => day.items);
+assert.equal(new Set(all.map(item => item.id)).size, all.length);
+assert.ok(all.every(item => item.answer && item.answers.every(answer => answer.trim()) && !/[\u4e00-\u9fff]/.test(item.answer)));
+const find = (year, key) => data.collections.find(group => group.year === year && group.key === key);
+assert.ok(find(2019, '16').items.some(item => item.answer === 'flamingo'));
+assert.ok(find(2020, '1').items.some(item => item.answer === 'design'));
+assert.ok(find(2021, '3.20').items.some(item => item.answer === 'packaging'));
+assert.ok(find(2021, '7.1').items.some(item => item.answer === '10000'));
+assert.ok(find(2022, '12.3').items.some(item => item.answer === '16 October,1980'));
+assert.ok(find(2022, '1.8').items.some(item => item.answer === '$37.50'));
+assert.equal(find(2022, '1.15').items.length, 22);
+assert.equal(find(2022, '12.10').items.length, 10);
+assert.ok(find(2022, '7.16').items.some(item => item.answer === 'Grateley'));
+const address = find(2022, '2.12').items.find(item => item.answer === '463 Beacon Street/Avenue');
+assert.equal(speech.check('463 Beacon Avenue', address).accepted, true);
+assert.equal(speech.check('Avenue', address).accepted, false);
+console.log('PASS ' + count + ' reading/grading cases and 26 source-data assertions');

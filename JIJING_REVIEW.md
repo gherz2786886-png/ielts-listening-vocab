@@ -1,5 +1,7 @@
 # Jijing item dictation pilot — 2026-10-19
 
+Historical pilot snapshot. Current Day28–101 coverage and evidence supersede this scope; see [JIJING_FULL_REVIEW.md](JIJING_FULL_REVIEW.md).
+
 ## Behavior
 
 The header switches between 场景词 and 机经词. The existing scene library, routes and `ieltsVocab.*` records are retained. The new item practice starts at check-in Day28 and supports selecting items, one-item practice, sequential/random quizzes, separate wrong records and mastery/restoration.
