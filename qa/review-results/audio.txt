@@ -1,0 +1,12 @@
+PASS official Youdao UK/US mapping and encoded phrases
+PASS preload fetches both accents without starting playback
+PASS stop cancels a delayed TTS start and resolves the pending play
+PASS a new play invalidates the older fallback timer and voice listener
+PASS timeout fallback releases the original audio before speaking
+PASS a stale audio canplay event cannot cancel the next playback watchdog
+PASS canplay without actual playback keeps a startup timeout
+PASS actual playback clears the startup timeout and ends once
+PASS synchronous play failure falls back immediately
+PASS competing media failures start only one fallback
+PASS voice readiness preserves existing listeners and selects the loaded voice
+11/11 audio regressions passed

@@ -67,6 +67,7 @@ body {
   text-decoration: none;
   color: var(--ink);
   min-width: 0;
+  flex: 1;
 }
 
 .brand-mark {
@@ -87,12 +88,15 @@ body {
   font-weight: 700;
   font-size: 15px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tabs {
   margin-left: auto;
   display: flex;
   gap: 4px;
+  flex: none;
 }
 
 .tab {
@@ -106,6 +110,7 @@ body {
   color: var(--muted);
   font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .tab.active {
@@ -786,6 +791,24 @@ body {
   font-weight: 700;
   color: var(--muted);
   margin-bottom: 6px;
+}
+
+.app-notice {
+  max-width: 820px;
+  margin: 12px auto 0;
+  padding: 10px 14px;
+  background: #fff4d8;
+  color: #694700;
+  border: 1px solid #e8cd83;
+  border-radius: 8px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.source-note {
+  color: #815400;
+  font-size: 12px;
+  margin: 8px 0 0;
 }
 
 /* ---------- 桌面扩展 ---------- */
