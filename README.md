@@ -140,7 +140,7 @@ node qa/review_browser_regressions.js
 
 支持逐项勾选、单项播放/听写、顺序/随机组卷、批改、独立错词本及已掌握/移回。每日练习和 PDF 题组使用不同记录 ID，两个入口的答题进度分别保存。原有 Day28–30 的110个 ID、答案、可接受写法保持不变。
 
-纯数字默认用号码读法：`33 → double three`，`333 → triple three`；也可切换数值读法 `33 → thirty-three`。日期、明确时间、小数、金额、百分比和常见数量短语分别处理。专名、字母数字混合代码及未识别格式仍按原文交给发音服务，需结合原资料核对。纯数字答案填写数字，不填写 `double three`。
+金额、日期、数量、号码和字母数字编码自动识别，界面不再提供“纯数字读法”选项，旧浏览器保存的 digits/cardinal 偏好也不再参与发音。`AC832T → A C eight three two T`，`AC833T → A C eight double three T`，`Phone: 33 → double three`；`$25000 → twenty-five thousand dollars`，`8.50 pounds → eight pounds and fifty pence`。没有号码标记的短整数按普通数值读（`33 → thirty-three`），超过4位的无单位数字、前导零和分段号码按号码读；P2–P4/S2–S4 题目中的无单位整数按数量读。币种、金额标签、日期及数量单位优先于位数。未标币种的金额不擅自添加 dollars；缺少题意的裸数字不能保证语义完全识别。试播区支持输入号码、编码或金额，无需选择模式。数字答案填写数字，编码按原文填写；专有名词读音仍需结合原资料核对。
 
 发音按需请求词典单词片段，失败时回退可用浏览器语音；没有上传原始大体积音视频，也没有删除本地文件。网络与设备英语语音会影响播放，不能声称每个专名都经过真人听校。新机经记录保存在当前浏览器 `ieltsJijing.v1`，与场景词记录分开，暂不跨设备同步。
 
@@ -154,3 +154,5 @@ node qa/review_audio_regressions.js
 ```
 
 提取器需要 pypdf，仅用于维护词库；网页本身仍无需安装依赖或构建。`scripts/extract_jijing.py` 保留为 Day28–30 历史样板提取参考，运行它会将词库缩回三日，不能用于更新完整词库。
+
+自动读法的规则、验证和回滚见 [AUTO_NUMBER_REVIEW.md](AUTO_NUMBER_REVIEW.md)。

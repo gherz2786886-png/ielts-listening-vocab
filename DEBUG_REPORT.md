@@ -59,3 +59,8 @@ The overflow assertion alone missed vertical navigation text. The regression now
 ## 2026-10-19 Jijing range extension
 
 Day28–101 and source-only PDF groups are implemented and validated. Source alignment, extraction defects caught during development, test-helper correction, retained limitations and rollback are documented in [JIJING_FULL_REVIEW.md](JIJING_FULL_REVIEW.md). No system/environment repair was required.
+
+
+## Automatic readout correction
+
+The global numeric preference and unsplit alphanumeric path caused the user-reported behavior. The manual control and preference dependency are removed, with ordered automatic rules and a richer trial input. Regression, media and recovery evidence is documented in [AUTO_NUMBER_REVIEW.md](AUTO_NUMBER_REVIEW.md).

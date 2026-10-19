@@ -95,17 +95,31 @@ async function listenText(page) {
       await page.locator('#jijingLibrary').click();
       assert.equal(await page.locator('#jDay').inputValue(), '29');
     });
-    await test(browser, '33 uses double three; numeric mode changes to thirty-three', async page => {
+    await test(browser, 'automatic code, phone, number and money readings have no manual selector', async page => {
+      assert.equal(await page.locator('#jNumberMode').count(), 0);
       await page.locator('.j-number-demo summary').click();
       await page.locator('[data-jdemo]').click();
-      assert.deepEqual((await listenText(page)).slice(-2), ['double', 'three']);
-      assert.match(await page.locator('#jDemoText').innerText(), /33 → double three/);
-      await page.locator('#jNumberMode').selectOption('cardinal');
-      await page.locator('.j-number-demo summary').click();
-      await page.locator('[data-jdemo]').click();
-      assert.deepEqual((await listenText(page)).slice(-2), ['thirty', 'three']);
-      assert.equal(await page.locator('[data-jpick]').count(), 40);
-    });
+      assert.deepEqual(await listenText(page), ['A', 'C', 'eight', 'three', 'two', 'T']);
+      assert.match(await page.locator('#jDemoText').innerText(), /AC832T → A C eight three two T/);
+      for (const [value, expected] of [
+        ['Phone: 33', ['double', 'three']],
+        ['33', ['thirty', 'three']],
+        ['$25000', ['twenty', 'five', 'thousand', 'dollars']],
+        ['8.50 pounds', ['eight', 'pounds', 'and', 'fifty', 'pence']],
+        ['AC833T', ['A', 'C', 'eight', 'double', 'three', 'T']]
+      ]) {
+        const before = (await listenText(page)).length;
+        await page.locator('#jDemo').fill(value);
+        await page.locator('[data-jdemo]').click();
+        assert.deepEqual((await listenText(page)).slice(before), expected, value);
+      }
+      await page.screenshot({path:path.join(output,'automatic-reading-desktop.png'),fullPage:false});
+      await page.locator('#mainTabs [data-route="dictation"]').click();
+      assert.equal(await page.locator('#jNumberMode').count(), 0);
+      assert.doesNotMatch(await page.locator('#app').innerText(), /纯数字读法/);
+    }, { init: () => {
+      if (!localStorage.getItem('ieltsJijing.v1')) localStorage.setItem('ieltsJijing.v1', JSON.stringify({settings:{numberMode:'cardinal'},records:{}}));
+    } });
     await test(browser, 'checkbox selection creates exactly the selected two-item quiz', async page => {
       await page.locator('[data-jselect-none]').click();
       assert.equal(await page.locator('[data-jstart-selected]').isDisabled(), true);
@@ -113,7 +127,7 @@ async function listenText(page) {
       await page.locator('[data-jpick="j2019-d05-010"]').check();
       await page.locator('[data-jstart-selected]').click();
       assert.match(await page.locator('.quiz-top').innerText(), /第 1 \/ 2 题/);
-      assert.deepEqual(await listenText(page), ['double', 'one'], 'First autoplay must survive routing');
+      assert.deepEqual(await listenText(page), ['eleven'], 'Short ordinary numbers use cardinal reading automatically');
       await page.locator('#jAnswer').fill('11');
       await page.locator('#jAnswer').press('Enter');
       assert.equal(await page.locator('.result-box.ok').count(), 1);
@@ -185,7 +199,7 @@ async function listenText(page) {
         assert.ok(nav, 'Brand and navigation do not overlap');
         await page.screenshot({ path: path.join(output, 'learn-' + width + '.png'), fullPage: true });
         await page.locator('[data-jsingle="j2019-d05-009"]').click();
-        assert.equal(await page.locator('#app').innerText().then(text => text.includes('double one')), false, 'Do not reveal the answer or its spoken form before submission');
+        assert.equal(await page.locator('#app').innerText().then(text => text.includes('eleven')), false, 'Do not reveal the answer or its spoken form before submission');
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
         await page.screenshot({ path: path.join(output, 'quiz-' + width + '.png'), fullPage: true });
       }, { viewport: { width, height: 844 } });
@@ -194,7 +208,7 @@ async function listenText(page) {
       await page.screenshot({ path: path.join(output, 'learn-desktop.png'), fullPage: false });
       await page.locator('.j-number-demo summary').click();
       await page.locator('[data-jdemo]').click();
-      await page.screenshot({ path: path.join(output, 'double-three-desktop.png'), fullPage: false });
+      await page.screenshot({ path: path.join(output, 'automatic-code-desktop.png'), fullPage: false });
     });
   } finally { await browser.close(); }
   fs.writeFileSync(path.join(output, 'results.json'), JSON.stringify(results, null, 2));

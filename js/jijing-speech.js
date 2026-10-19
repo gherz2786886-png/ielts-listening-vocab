@@ -31,13 +31,15 @@
 
   function cardinal(number) {
     var n = Number(number);
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1000000000) return digits(number);
+    if (!Number.isSafeInteger(n) || n < 0) return digits(number);
     if (n < 20) return ONES[n];
     if (n < 100) return TENS[Math.floor(n / 10)] + (n % 10 ? '-' + ONES[n % 10] : '');
     if (n < 1000) return ONES[Math.floor(n / 100)] + ' hundred' + (n % 100 ? ' and ' + cardinal(n % 100) : '');
-    var unit = n >= 1000000 ? 1000000 : 1000;
+    var unit = n >= 1e15 ? 1e15 : n >= 1e12 ? 1e12 : n >= 1e9 ? 1e9 : n >= 1e6 ? 1e6 : 1000;
+    var name = unit === 1e15 ? 'quadrillion' : unit === 1e12 ? 'trillion' : unit === 1e9 ? 'billion' :
+      unit === 1e6 ? 'million' : 'thousand';
     var rest = n % unit;
-    return cardinal(Math.floor(n / unit)) + (unit === 1000000 ? ' million' : ' thousand') +
+    return cardinal(Math.floor(n / unit)) + ' ' + name +
       (rest ? (rest < 100 ? ' and ' : ' ') + cardinal(rest) : '');
   }
 
@@ -50,10 +52,65 @@
     return null;
   }
 
-  function forAnswer(value, mode) {
-    value = String(value).trim();
+  function numberText(value) {
+    var decimal = /^(\d+)\.(\d+)$/.exec(value);
+    return decimal ? cardinal(decimal[1]) + ' point ' + decimal[2].split('').map(function (digit) {
+      return ONES[Number(digit)];
+    }).join(' ') : cardinal(value);
+  }
+
+  function codeText(value) {
+    return value.toUpperCase().match(/[A-Z]+|\d+/g).map(function (part) {
+      return /^\d/.test(part) ? digits(part) : part.split('').join(' ');
+    }).join(' ');
+  }
+
+  function moneyReading(value) {
+    // Currency markers/units take precedence over identifier length or context.
+    var currencies = '(US\\$|USD|GBP|EUR|CNY|RMB|\\$|£|€|¥|￥|dollars?|pounds?|euros?|yuan)';
+    var amount = '(\\d+(?:\\.\\d{1,2})?)';
+    var match = new RegExp('^' + currencies + '\\s*' + amount + '$', 'i').exec(value);
+    var unit, valueText;
+    if (match) { unit = match[1]; valueText = match[2]; }
+    else {
+      match = new RegExp('^' + amount + '\\s*' + currencies + '$', 'i').exec(value);
+      if (!match) return null;
+      valueText = match[1]; unit = match[2];
+    }
+    var parts = valueText.split('.');
+    var whole = parts[0], cents = parts[1] ? Number((parts[1] + '0').slice(0, 2)) : 0;
+    var major = /^(?:£|GBP|pounds?)$/i.test(unit) ? 'pound' : /^(?:€|EUR|euros?)$/i.test(unit) ? 'euro' :
+      /^(?:¥|￥|CNY|RMB|yuan)$/i.test(unit) ? 'yuan' : 'dollar';
+    var minor = major === 'pound' ? (cents === 1 ? 'penny' : 'pence') :
+      major === 'yuan' ? 'fen' : (cents === 1 ? 'cent' : 'cents');
+    return { kind: '金额', text: cardinal(whole) + ' ' + major +
+      (Number(whole) !== 1 && major !== 'yuan' ? 's' : '') +
+      (cents ? ' and ' + cardinal(cents) + ' ' + minor : '') };
+  }
+
+  function forAnswer(value, context) {
+    // Old saved digits/cardinal preferences are deliberately ignored.
+    context = context && typeof context === 'object' ? context : {};
+    value = String(value).normalize('NFKC').replace(/[–—]/g, '-').trim();
+    var identifierLabel = /^(?:(?:visa(?:\s*(?:card|卡))?(?:\s*(?:号码|号))?|credit\s+card|debit\s+card|card|account|phone|telephone|mobile|tel|booking|reservation|reference|flight|boarding\s+pass|passport|postcode|postal\s+code|pin|cvv|cvc|code)(?:\s+(?:number|no\.?|reference|code))?|电话(?:号码)?|手机(?:号码)?|信用卡(?:号)?|卡号|账号|航班(?:号)?|登机牌|护照(?:号码)?|预订号|邮编|编号)\s*[:：#]?\s*(?=[A-Z0-9+])/i;
+    var amountLabel = /^(?:price|cost|fee|fare|rent|amount|balance|金额|价格|费用|租金)\s*[:：]?\s*(?=[$£€¥￥\d])/i;
+    var isIdentifier = identifierLabel.test(value) || context.type === 'identifier' ||
+      identifierLabel.test(String(context.label || '') + ' 0');
+    var isAmount = amountLabel.test(value) || context.type === 'amount' ||
+      amountLabel.test(String(context.label || '') + ' 0');
+    value = value.replace(identifierLabel, '').replace(amountLabel, '');
+    // A thousands separator is numerical punctuation, not telephone grouping.
+    var thousands = /\b\d{1,3}(?:,\d{3})+(?:\.\d+)?\b/.test(value);
+    value = value.replace(/\b\d{1,3}(?:,\d{3})+(?:\.\d+)?\b/g, function (part) { return part.replace(/,/g, ''); });
+    var money = moneyReading(value);
+    if (money) return money;
     var date = dateParts(value);
     if (date) return { kind: '日期', text: 'the ' + ORDINALS[date.day] + ' of ' + date.month };
+    var range = /^(\d{1,2})[:.](\d{2})\s*-\s*(\d{1,2})[:.](\d{2})$/.exec(value);
+    if (range && Number(range[1]) < 24 && Number(range[3]) < 24 && Number(range[2]) < 60 && Number(range[4]) < 60) {
+      return { kind: '时间范围', text: forAnswer(range[1] + ':' + range[2]).text + ' to ' +
+        forAnswer(range[3] + ':' + range[4]).text };
+    }
     var time = /^(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm)$/i.exec(value);
     if (time && Number(time[1]) >= 1 && Number(time[1]) <= 12 && (!time[2] || Number(time[2]) < 60)) {
       var minute = time[2] && Number(time[2]);
@@ -66,30 +123,36 @@
       return { kind: '时间', text: cardinal(clock[1]) + (Number(clock[2]) ? ' ' +
         (Number(clock[2]) < 10 ? 'oh ' + ONES[Number(clock[2])] : cardinal(clock[2])) : " o'clock") };
     }
-    var money = /^(\$|£)(\d+)(?:\.(\d{1,2}))?$/.exec(value) || /^(\d+)(?:\.(\d{1,2}))?(\$|£)$/.exec(value);
-    if (money) {
-      var symbol = money[1] === '$' || money[1] === '£' ? money[1] : money[3];
-      var whole = money[1] === symbol ? money[2] : money[1];
-      var fraction = money[1] === symbol ? money[3] : money[2];
-      var cents = fraction ? Number((fraction + '0').slice(0, 2)) : 0;
-      var major = symbol === '$' ? 'dollar' : 'pound';
-      var minor = symbol === '$' ? (cents === 1 ? 'cent' : 'cents') : (cents === 1 ? 'penny' : 'pence');
-      return { kind: '金额', text: cardinal(whole) + ' ' + major + (Number(whole) === 1 ? '' : 's') +
-        (cents ? ' and ' + cardinal(cents) + ' ' + minor : '') };
-    }
     var percentage = /^(\d+(?:\.\d+)?)\s*%$/.exec(value);
-    if (percentage) return { kind: '百分比', text: forAnswer(percentage[1], 'cardinal').text + ' percent' };
+    if (percentage) return { kind: '百分比', text: numberText(percentage[1]) + ' percent' };
     var decimal = /^(\d+)\.(\d+)$/.exec(value);
-    if (decimal) return { kind: '小数', text: cardinal(decimal[1]) + ' point ' +
-      decimal[2].split('').map(function (digit) { return ONES[Number(digit)]; }).join(' ') };
-    if (/^\d[\d ()-]*$/.test(value)) {
-      return { kind: mode === 'cardinal' && /^\d+$/.test(value) ? '数值' : '数字串',
-        text: mode === 'cardinal' && /^\d+$/.test(value) ? cardinal(value) : digits(value) };
-    }
-    var quantity = /^(\d+(?:\.\d+)?)\s*(cm|weeks?|days?|months?|years?|dollars?|pounds?|minutes?|hours?|percent|million|millions|adults?)$/i.exec(value);
-    if (quantity) return { kind: '数量短语', text: forAnswer(quantity[1], 'cardinal').text + ' ' +
+    if (decimal) return { kind: isAmount ? '金额（未标币种）' : '小数', text: numberText(value) };
+    var quantity = /^(\d+(?:\.\d+)?)\s*(cm|weeks?|days?|months?|years?|minutes?|hours?|percent|million|millions|adults?)$/i.exec(value);
+    if (quantity) return { kind: '数量短语', text: numberText(quantity[1]) + ' ' +
       (quantity[2].toLowerCase() === 'cm' ? 'centimetres' : quantity[2]) };
-    if (/\d/.test(value)) return { kind: '含数字短语（按原文）', text: value };
+    var century = /^(\d{1,2})(?:st|nd|rd|th)\s+century$/i.exec(value);
+    if (century && ORDINALS[Number(century[1])]) return { kind: '世纪', text: ORDINALS[Number(century[1])] + ' century' };
+    var compactCode = value.replace(/[ -]/g, '');
+    var codeFormat = isIdentifier || !/[ -]/.test(value) ||
+      (/^[A-Z0-9 -]+$/.test(value) && !/[A-Z]{4,}/.test(value)) ||
+      /^[A-Z]{1,2}\d[A-Z\d]?\s+\d[A-Z]{2}$/i.test(value);
+    if (codeFormat && /^[A-Za-z0-9]+$/.test(compactCode) && /[A-Za-z]/.test(compactCode) && /\d/.test(compactCode)) {
+      return { kind: '字母数字编码', text: codeText(value) };
+    }
+    if (/^(?:\d|\(\d)[\d ()-]*$/.test(value)) {
+      var run = value.replace(/\D/g, '');
+      var formatted = /[ ()-]/.test(value);
+      var lectureQuantity = /^[SP][234]$/.test(context.part || '');
+      var identifier = !isAmount && (isIdentifier || /^0\d/.test(run) || formatted ||
+        (run.length > 4 && !lectureQuantity && !thousands));
+      return { kind: identifier ? '号码' : isAmount ? '金额（未标币种）' : '数值',
+        text: identifier ? digits(value) : cardinal(run) };
+    }
+    if (/^\+\d[\d ()-]+$/.test(value)) return { kind: '号码', text: 'plus ' + digits(value.slice(1)) };
+    // Addresses and other ordinary phrases keep their words; only embedded tokens are expanded.
+    if (/\d/.test(value)) return { kind: '含数字短语', text: value.replace(/[A-Za-z]*\d+[A-Za-z0-9]*/g, function (part) {
+      return /[A-Za-z]/.test(part) ? codeText(part) : cardinal(part);
+    }) };
     return { kind: '单词 / 短语', text: value };
   }
 
