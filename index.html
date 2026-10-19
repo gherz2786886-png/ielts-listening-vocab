@@ -3,17 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>雅思听力场景词汇</title>
+<title>雅思听力 · 场景词 / 机经词</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230E7C7B'/%3E%3Ctext x='32' y='43' font-size='30' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'%3E词%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=20261019-jijing-1">
 </head>
 <body>
 <header class="appbar">
   <div class="appbar-inner">
-    <a class="brand" href="#/learn">
-      <span class="brand-mark" aria-hidden="true">词</span>
-      <span class="brand-text">雅思听力场景词汇</span>
-    </a>
+    <div class="brand">
+      <a class="brand-mark" href="#/learn" aria-label="返回场景词">词</a>
+      <div class="library-switch" aria-label="词库切换">
+        <a class="library-link" id="sceneLibrary" href="#/learn">场景词</a>
+        <span aria-hidden="true">/</span>
+        <a class="library-link" id="jijingLibrary" href="#/jijing/learn">机经词</a>
+      </div>
+    </div>
     <nav class="tabs" id="mainTabs">
       <a href="#/learn" data-route="learn" class="tab">学习</a>
       <a href="#/dictation" data-route="dictation" class="tab">听写</a>
@@ -25,9 +29,12 @@
 <div id="appNotice" class="app-notice" role="status" aria-live="polite" hidden></div>
 <main id="app" class="app"></main>
 
-<script src="data/vocab.js"></script>
-<script src="js/audio.js"></script>
-<script src="js/dictation.js"></script>
-<script src="js/app.js"></script>
+<script src="data/vocab.js?v=20261019-jijing-1"></script>
+<script src="js/audio.js?v=20261019-jijing-1"></script>
+<script src="js/dictation.js?v=20261019-jijing-1"></script>
+<script src="data/jijing.js?v=20261019-jijing-1"></script>
+<script src="js/jijing-speech.js?v=20261019-jijing-1"></script>
+<script src="js/jijing.js?v=20261019-jijing-1"></script>
+<script src="js/app.js?v=20261019-jijing-1"></script>
 </body>
 </html>

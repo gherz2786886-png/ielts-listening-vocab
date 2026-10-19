@@ -19,7 +19,7 @@ function createEnvironment(options = {}) {
     onvoiceschanged: null,
     getVoices: () => options.voices || [],
     cancel() {},
-    speak(utterance) { spoken.push(utterance); },
+    speak(utterance) { spoken.push(utterance); if (!options.noSpeechStart && utterance.onstart) utterance.onstart(); },
     addEventListener(type, fn) { if (type === 'voiceschanged') voiceListeners.add(fn); },
     removeEventListener(type, fn) { if (type === 'voiceschanged') voiceListeners.delete(fn); }
   };
@@ -82,6 +82,64 @@ function createEnvironment(options = {}) {
 }
 
 const tests = [
+  ['missing browser speech start fails within a bounded time', async () => {
+    const env = createEnvironment({ voices: [{ lang: 'en-GB' }], noSpeechStart: true });
+    const pending = env.api.play('unknown name', 'uk').catch(error => error);
+    env.audios[0].emit('error');
+    env.tick(5000);
+    const error = await pending;
+    assert.match(error.message, /did not start/);
+    assert.equal(env.api.current, null);
+  }],
+  ['browser speech without an end event also times out', async () => {
+    const env = createEnvironment({ voices: [{ lang: 'en-GB' }] });
+    const pending = env.api.play('unknown name', 'uk').catch(error => error);
+    env.audios[0].emit('error');
+    env.tick(30000);
+    const error = await pending;
+    assert.match(error.message, /timed out/);
+    assert.equal(env.api.current, null);
+  }],
+  ['a sequence plays double then three in order', async () => {
+    const env = createEnvironment();
+    const pending = env.api.playSequence(['double', 'three'], 'uk');
+    for (let i = 0; i < 8; i++) await Promise.resolve();
+    assert.equal(env.audios.length, 1);
+    assert.equal(new URL(env.audios[0].src).searchParams.get('audio'), 'double');
+    env.audios[0].emit('ended');
+    for (let i = 0; i < 8; i++) await Promise.resolve();
+    assert.equal(env.audios.length, 2);
+    assert.equal(new URL(env.audios[1].src).searchParams.get('audio'), 'three');
+    env.audios[1].emit('ended');
+    await pending;
+  }],
+  ['stop before a sequence starts prevents every word', async () => {
+    const env = createEnvironment();
+    const pending = env.api.playSequence(['double', 'three'], 'uk');
+    env.api.stop();
+    await pending;
+    assert.equal(env.audios.length, 0);
+  }],
+  ['stop between words prevents the following word', async () => {
+    const env = createEnvironment();
+    const pending = env.api.playSequence(['double', 'three'], 'uk');
+    for (let i = 0; i < 8; i++) await Promise.resolve();
+    env.audios[0].emit('ended');
+    env.api.stop();
+    await pending;
+    assert.equal(env.audios.length, 1);
+  }],
+  ['new single playback cancels the old sequence without a completion callback', async () => {
+    const env = createEnvironment();
+    let ended = 0;
+    const old = env.api.playSequence(['double', 'three'], 'uk', { onEnd() { ended++; } });
+    for (let i = 0; i < 8; i++) await Promise.resolve();
+    const newer = env.api.play('blue', 'us');
+    env.audios[1].emit('ended');
+    await Promise.all([old, newer]);
+    assert.equal(env.audios.length, 2);
+    assert.equal(ended, 0);
+  }],
   ['official Youdao UK/US mapping and encoded phrases', () => {
     const { api } = createEnvironment();
     // Primary evidence: https://dict.youdao.com/w/eng/tomato/

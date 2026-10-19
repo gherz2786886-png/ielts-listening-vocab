@@ -1,0 +1,50 @@
+[
+  {
+    "name": "library switch and persisted Day selection",
+    "passed": true
+  },
+  {
+    "name": "33 uses double three; numeric mode changes to thirty-three",
+    "passed": true
+  },
+  {
+    "name": "checkbox selection creates exactly the selected two-item quiz",
+    "passed": true
+  },
+  {
+    "name": "wrong answers survive reload independently of scene records",
+    "passed": true
+  },
+  {
+    "name": "date playback and alternate written date are accepted",
+    "passed": true
+  },
+  {
+    "name": "source alternatives 4 and 4.00 remain accepted",
+    "passed": true
+  },
+  {
+    "name": "zero-answer early exit and a new setup do not create fake results",
+    "passed": true
+  },
+  {
+    "name": "unreadable Jijing data is preserved and visibly reported",
+    "passed": true
+  },
+  {
+    "name": "responsive item selection and hidden-answer quiz at 320",
+    "passed": true
+  },
+  {
+    "name": "responsive item selection and hidden-answer quiz at 375",
+    "passed": true
+  },
+  {
+    "name": "responsive item selection and hidden-answer quiz at 390",
+    "passed": true
+  },
+  {
+    "name": "desktop learning view, data and readout type remain visible",
+    "passed": true
+  }
+]

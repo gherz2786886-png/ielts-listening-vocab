@@ -1,0 +1,932 @@
+window.JIJING = {
+  "version": 1,
+  "source": {
+    "file": "2019机经词汇.pdf",
+    "sha256": "3c971b70adf201cbf90d2652c3c2726b7861d01c9a83261a6ae5d9d8c011a173",
+    "reviewedPages": [
+      1,
+      2
+    ],
+    "groupCount": 24
+  },
+  "days": [
+    {
+      "day": 28,
+      "year": 2019,
+      "sourceDay": 5,
+      "pages": [
+        1
+      ],
+      "alignment": "本日按 PDF 第 5 组与打卡整理表编排；尚未逐项核对原录音。",
+      "items": [
+        {
+          "id": "j2019-d05-001",
+          "answer": "Maclver",
+          "answers": [
+            "Maclver"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-002",
+          "answer": "North",
+          "answers": [
+            "North"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-003",
+          "answer": "back door",
+          "answers": [
+            "back door"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-004",
+          "answer": "271963",
+          "answers": [
+            "271963"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-005",
+          "answer": "1936",
+          "answers": [
+            "1936"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-006",
+          "answer": "top roof",
+          "answers": [
+            "top roof"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-007",
+          "answer": "bushes",
+          "answers": [
+            "bushes"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-008",
+          "answer": "Saturday",
+          "answers": [
+            "Saturday"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-009",
+          "answer": "11",
+          "answers": [
+            "11"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-010",
+          "answer": "blue",
+          "answers": [
+            "blue"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-011",
+          "answer": "children",
+          "answers": [
+            "children"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-012",
+          "answer": "piano",
+          "answers": [
+            "piano"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-013",
+          "answer": "radio",
+          "answers": [
+            "radio"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-014",
+          "answer": "evening",
+          "answers": [
+            "evening"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-015",
+          "answer": "4/4.00",
+          "answers": [
+            "4",
+            "4.00"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-016",
+          "answer": "candles",
+          "answers": [
+            "candles"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-017",
+          "answer": "Tuesday",
+          "answers": [
+            "Tuesday"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-018",
+          "answer": "donation",
+          "answers": [
+            "donation"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-019",
+          "answer": "deduction",
+          "answers": [
+            "deduction"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-020",
+          "answer": "singer",
+          "answers": [
+            "singer"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d05-021",
+          "answer": "bridges",
+          "answers": [
+            "bridges"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-022",
+          "answer": "safety",
+          "answers": [
+            "safety"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-023",
+          "answer": "stress",
+          "answers": [
+            "stress"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-024",
+          "answer": "pollution",
+          "answers": [
+            "pollution"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-025",
+          "answer": "weather",
+          "answers": [
+            "weather"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-026",
+          "answer": "coal",
+          "answers": [
+            "coal"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-027",
+          "answer": "cement",
+          "answers": [
+            "cement"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-028",
+          "answer": "spray",
+          "answers": [
+            "spray"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-029",
+          "answer": "cost",
+          "answers": [
+            "cost"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-030",
+          "answer": "training",
+          "answers": [
+            "training"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-031",
+          "answer": "cars",
+          "answers": [
+            "cars"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-032",
+          "answer": "caves",
+          "answers": [
+            "caves"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-033",
+          "answer": "clay",
+          "answers": [
+            "clay"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-034",
+          "answer": "rainfall",
+          "answers": [
+            "rainfall"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-035",
+          "answer": "foundation",
+          "answers": [
+            "foundation"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-036",
+          "answer": "pond",
+          "answers": [
+            "pond"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-037",
+          "answer": "irrigation",
+          "answers": [
+            "irrigation"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-038",
+          "answer": "tree",
+          "answers": [
+            "tree"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-039",
+          "answer": "agriculture",
+          "answers": [
+            "agriculture"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d05-040",
+          "answer": "map",
+          "answers": [
+            "map"
+          ],
+          "part": "S4"
+        }
+      ],
+      "sourceText": "S1:1.Maclver,North,back door,271963,1936,top roof, bushes, Saturday,11,blue\n2.children,piano,radio,evening,4/4.00,candles,Tuesday,donation, deduction,singer\nS4：1.新型涂料 bridges,safety,stress,pollution,weather,coal,cement,spray,cost,training\n2.地理地貌 cars,caves,clay,rainfall,foundation,pond,irrigation,tree,agriculture,map"
+    },
+    {
+      "day": 29,
+      "year": 2019,
+      "sourceDay": 6,
+      "pages": [
+        1,
+        2
+      ],
+      "alignment": "本日按 PDF 第 6 组与打卡整理表编排；尚未逐项核对原录音。",
+      "items": [
+        {
+          "id": "j2019-d06-001",
+          "answer": "technician",
+          "answers": [
+            "technician"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-002",
+          "answer": "23",
+          "answers": [
+            "23"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-003",
+          "answer": "month",
+          "answers": [
+            "month"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-004",
+          "answer": "35.70",
+          "answers": [
+            "35.70"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-005",
+          "answer": "1 August",
+          "answers": [
+            "1 August"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-006",
+          "answer": "market",
+          "answers": [
+            "market"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-007",
+          "answer": "Sunday",
+          "answers": [
+            "Sunday"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-008",
+          "answer": "lifting",
+          "answers": [
+            "lifting"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-009",
+          "answer": "watering",
+          "answers": [
+            "watering"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-010",
+          "answer": "math",
+          "answers": [
+            "math"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-011",
+          "answer": "communication",
+          "answers": [
+            "communication"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-012",
+          "answer": "passport",
+          "answers": [
+            "passport"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-013",
+          "answer": "5 pm",
+          "answers": [
+            "5 pm"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-014",
+          "answer": "Rapana",
+          "answers": [
+            "Rapana"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-015",
+          "answer": "3438873",
+          "answers": [
+            "3438873"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-016",
+          "answer": "passport",
+          "answers": [
+            "passport"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d06-017",
+          "answer": "sloping",
+          "answers": [
+            "sloping"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-018",
+          "answer": "tunnel",
+          "answers": [
+            "tunnel"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-019",
+          "answer": "rivers",
+          "answers": [
+            "rivers"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-020",
+          "answer": "mountains",
+          "answers": [
+            "mountains"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-021",
+          "answer": "wars",
+          "answers": [
+            "wars"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-022",
+          "answer": "evaporation",
+          "answers": [
+            "evaporation"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-023",
+          "answer": "pump",
+          "answers": [
+            "pump"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-024",
+          "answer": "rain",
+          "answers": [
+            "rain"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-025",
+          "answer": "streets",
+          "answers": [
+            "streets"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-026",
+          "answer": "poor",
+          "answers": [
+            "poor"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-027",
+          "answer": "activities",
+          "answers": [
+            "activities"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-028",
+          "answer": "pleasure",
+          "answers": [
+            "pleasure"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-029",
+          "answer": "definition",
+          "answers": [
+            "definition"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-030",
+          "answer": "skills",
+          "answers": [
+            "skills"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-031",
+          "answer": "impact",
+          "answers": [
+            "impact"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-032",
+          "answer": "children",
+          "answers": [
+            "children"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-033",
+          "answer": "priority",
+          "answers": [
+            "priority"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-034",
+          "answer": "membership",
+          "answers": [
+            "membership"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-035",
+          "answer": "experiences",
+          "answers": [
+            "experiences"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-036",
+          "answer": "feedback",
+          "answers": [
+            "feedback"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-037",
+          "answer": "long-term",
+          "answers": [
+            "long-term"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d06-038",
+          "answer": "planning",
+          "answers": [
+            "planning"
+          ],
+          "part": "S4"
+        }
+      ],
+      "sourceText": "S1:1.technician,23,month,35.70,1 August\n2.market,Sunday,lifting,watering,math,communication,passport,5 pm, Rapana,\n3438873,passport\nS4：1.地下水灌溉系统\nsloping,tunnel,rivers,mountains,wars,evaporation,pump,rain,streets,poor\n2.现代图书馆的使用调查\nactivities,pleasure,definition,skills,impact,children,priority,membership,experiences,\nfeedback,long-term,planning"
+    },
+    {
+      "day": 30,
+      "year": 2019,
+      "sourceDay": 7,
+      "pages": [
+        2
+      ],
+      "alignment": "本日按 PDF 第 7 组与打卡整理表编排；尚未逐项核对原录音。",
+      "items": [
+        {
+          "id": "j2019-d07-001",
+          "answer": "489724",
+          "answers": [
+            "489724"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-002",
+          "answer": "27 April",
+          "answers": [
+            "27 April"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-003",
+          "answer": "Museum",
+          "answers": [
+            "Museum"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-004",
+          "answer": "93",
+          "answers": [
+            "93"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-005",
+          "answer": "cold drinks",
+          "answers": [
+            "cold drinks"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-006",
+          "answer": "fish",
+          "answers": [
+            "fish"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-007",
+          "answer": "nuts",
+          "answers": [
+            "nuts"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-008",
+          "answer": "paper",
+          "answers": [
+            "paper"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-009",
+          "answer": "cake",
+          "answers": [
+            "cake"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-010",
+          "answer": "flower",
+          "answers": [
+            "flower"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-011",
+          "answer": "west",
+          "answers": [
+            "west"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-012",
+          "answer": "Russia",
+          "answers": [
+            "Russia"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-013",
+          "answer": "writing",
+          "answers": [
+            "writing"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-014",
+          "answer": "poetry",
+          "answers": [
+            "poetry"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-015",
+          "answer": "3.20",
+          "answers": [
+            "3.20"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-016",
+          "answer": "115",
+          "answers": [
+            "115"
+          ],
+          "part": "S1"
+        },
+        {
+          "id": "j2019-d07-017",
+          "answer": "conference centre",
+          "answers": [
+            "conference centre"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d07-018",
+          "answer": "leak",
+          "answers": [
+            "leak"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d07-019",
+          "answer": "balcony",
+          "answers": [
+            "balcony"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d07-020",
+          "answer": "car park",
+          "answers": [
+            "car park"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d07-021",
+          "answer": "transport museum",
+          "answers": [
+            "transport museum"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d07-022",
+          "answer": "exercises",
+          "answers": [
+            "exercises"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d07-023",
+          "answer": "dentist",
+          "answers": [
+            "dentist"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d07-024",
+          "answer": "lawyer",
+          "answers": [
+            "lawyer"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d07-025",
+          "answer": "personality",
+          "answers": [
+            "personality"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d07-026",
+          "answer": "payment method",
+          "answers": [
+            "payment method"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d07-027",
+          "answer": "insurance",
+          "answers": [
+            "insurance"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d07-028",
+          "answer": "taxi",
+          "answers": [
+            "taxi"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d07-029",
+          "answer": "10 weeks",
+          "answers": [
+            "10 weeks"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d07-030",
+          "answer": "gym",
+          "answers": [
+            "gym"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d07-031",
+          "answer": "monthly",
+          "answers": [
+            "monthly"
+          ],
+          "part": "S4"
+        },
+        {
+          "id": "j2019-d07-032",
+          "answer": "calculator",
+          "answers": [
+            "calculator"
+          ],
+          "part": "S4"
+        }
+      ],
+      "sourceText": "S1:1.489724,27 April,Museum,93,cold drinks,fish,nuts,paper,cake,flower\n2.west,Russia,writing,poetry,3.20,115\nS4：1.建筑大师 conference centre,leak,balcony,car park,transport museum,exercises\n2.消费市场调研 dentist,lawyer,personality,payment method,insurance,taxi,10\nweeks,gym,monthly,calculator"
+    }
+  ]
+};

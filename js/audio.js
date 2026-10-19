@@ -5,7 +5,7 @@
   var TTS_RACE_MS = 600;
   var state = {
     audio: null, utter: null, timer: null, voiceTimer: null,
-    voiceCleanup: null, serial: 0, current: null, pending: null
+    voiceCleanup: null, ttsTimer: null, serial: 0, sequence: 0, current: null, pending: null
   };
 
   function emit(name, detail) {
@@ -25,6 +25,10 @@
     if (state.voiceCleanup) state.voiceCleanup();
     state.voiceCleanup = null;
   }
+  function clearTtsTimer() {
+    if (state.ttsTimer !== null) clearTimeout(state.ttsTimer);
+    state.ttsTimer = null;
+  }
   function releaseAudio() {
     if (!state.audio) return;
     var audio = state.audio;
@@ -40,6 +44,7 @@
     state.serial++;
     clearTimer();
     clearVoiceWait();
+    clearTtsTimer();
     releaseAudio();
     if (global.speechSynthesis) {
       try { global.speechSynthesis.cancel(); } catch (e) {}
@@ -82,11 +87,12 @@
     } catch (e) {}
   }
   function stop() {
+    state.sequence++;
     var current = state.current;
     teardown();
     if (current) setCurrent(current.text, current.accent, false);
   }
-  function play(text, accent, opts) {
+  function playSingle(text, accent, opts) {
     opts = opts || {};
     accent = accent === 'us' ? 'us' : 'uk';
     teardown();
@@ -102,7 +108,11 @@
         settled = true;
         clearTimer();
         clearVoiceWait();
+        clearTtsTimer();
         state.pending = null;
+        if (error && state.utter && global.speechSynthesis) {
+          try { global.speechSynthesis.cancel(); } catch (e) {}
+        }
         state.utter = null;
         releaseAudio();
         setCurrent(text, accent, false);
@@ -125,12 +135,19 @@
           utter.lang = accent === 'uk' ? 'en-GB' : 'en-US';
           utter.rate = 0.95;
           state.utter = utter;
+          utter.onstart = function () {
+            if (!active()) return;
+            clearTtsTimer();
+            state.ttsTimer = setTimeout(function () { finish(new Error('speech playback timed out')); }, Math.max(30000, text.length * 300));
+            emit('vocab-audio-started', { text: text, accent: accent, channel: 'speech' });
+          };
           utter.onend = function () { finish(); };
           utter.onerror = function (event) {
             if (!active()) return;
             finish(new Error('tts error: ' + (event && event.error)));
           };
           var started = false;
+          state.ttsTimer = setTimeout(function () { finish(new Error('browser speech did not start')); }, 5000);
           function start() {
             if (!active() || started) return;
             started = true;
@@ -158,7 +175,10 @@
         fallbackToTTS('audio-error-' + (audio.error ? audio.error.code : 'unknown'));
       });
       audio.addEventListener('playing', function () {
-        if (active() && !mainSettled) clearTimer();
+        if (active() && !mainSettled) {
+          clearTimer();
+          emit('vocab-audio-started', { text: text, accent: accent, channel: 'online' });
+        }
       });
       audio.addEventListener('ended', function () {
         if (!active() || mainSettled) return;
@@ -174,8 +194,27 @@
       } catch (error) { fallbackToTTS('play-threw'); }
     });
   }
+  function play(text, accent, opts) {
+    state.sequence++;
+    return playSingle(text, accent, opts);
+  }
+  function playSequence(parts, accent, opts) {
+    opts = opts || {};
+    stop();
+    var sequence = state.sequence;
+    var chain = Promise.resolve();
+    parts.forEach(function (part) {
+      chain = chain.then(function () {
+        if (sequence !== state.sequence) return;
+        return playSingle(part, accent, { onFallback: opts.onFallback, onError: opts.onError });
+      });
+    });
+    return chain.then(function () {
+      if (sequence === state.sequence && typeof opts.onEnd === 'function') opts.onEnd();
+    });
+  }
   global.VocabAudio = {
-    urlFor: urlFor, play: play, stop: stop, preload: preload, supported: supported,
+    urlFor: urlFor, play: play, playSequence: playSequence, stop: stop, preload: preload, supported: supported,
     get current() { return state.current; }
   };
 })(window);

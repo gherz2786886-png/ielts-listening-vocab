@@ -1,0 +1,18 @@
+PASS missing browser speech start fails within a bounded time
+PASS browser speech without an end event also times out
+PASS a sequence plays double then three in order
+PASS stop before a sequence starts prevents every word
+PASS stop between words prevents the following word
+PASS new single playback cancels the old sequence without a completion callback
+PASS official Youdao UK/US mapping and encoded phrases
+PASS preload fetches both accents without starting playback
+PASS stop cancels a delayed TTS start and resolves the pending play
+PASS a new play invalidates the older fallback timer and voice listener
+PASS timeout fallback releases the original audio before speaking
+PASS a stale audio canplay event cannot cancel the next playback watchdog
+PASS canplay without actual playback keeps a startup timeout
+PASS actual playback clears the startup timeout and ends once
+PASS synchronous play failure falls back immediately
+PASS competing media failures start only one fallback
+PASS voice readiness preserves existing listeners and selects the loaded voice
+17/17 audio regressions passed

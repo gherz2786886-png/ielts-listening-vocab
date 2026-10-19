@@ -894,10 +894,16 @@
   /* ---------------- 路由 ---------------- */
 
   function setActiveTab() {
+    var jijing = state.route.indexOf('jijing/') === 0;
+    var view = jijing ? state.route.slice('jijing/'.length) : state.route;
     var tabs = document.querySelectorAll('#mainTabs .tab');
     for (var i = 0; i < tabs.length; i++) {
-      tabs[i].classList.toggle('active', tabs[i].getAttribute('data-route') === state.route);
+      var name = tabs[i].getAttribute('data-route');
+      tabs[i].setAttribute('href', '#/' + (jijing ? 'jijing/' : '') + name);
+      tabs[i].classList.toggle('active', name === view);
     }
+    document.getElementById('sceneLibrary').classList.toggle('active', !jijing);
+    document.getElementById('jijingLibrary').classList.toggle('active', jijing);
   }
 
   function router() {
@@ -906,9 +912,18 @@
     var qi = h.indexOf('?');
     var route = qi >= 0 ? h.slice(0, qi) : h;
     var query = qi >= 0 ? h.slice(qi + 1) : '';
-    if (['learn', 'dictation', 'wrong'].indexOf(route) < 0) route = 'learn';
+    if (['learn', 'dictation', 'wrong', 'jijing/learn', 'jijing/dictation', 'jijing/wrong'].indexOf(route) < 0) route = 'learn';
     state.route = route;
     setActiveTab();
+
+    if (route.indexOf('jijing/') === 0) {
+      if (window.JijingApp) JijingApp.render(route.slice('jijing/'.length));
+      else fatal('机经词数据暂未加载，请刷新页面，或点击顶部「场景词」返回。');
+      window.scrollTo(0, 0);
+      return;
+    }
+    appEl.dataset.library = 'scene';
+    updateBadge();
 
     if (route === 'dictation') {
       var params = {};
