@@ -54,12 +54,17 @@
     value = String(value).trim();
     var date = dateParts(value);
     if (date) return { kind: '日期', text: 'the ' + ORDINALS[date.day] + ' of ' + date.month };
-    var time = /^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/i.exec(value);
+    var time = /^(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm)$/i.exec(value);
     if (time && Number(time[1]) >= 1 && Number(time[1]) <= 12 && (!time[2] || Number(time[2]) < 60)) {
       var minute = time[2] && Number(time[2]);
       return { kind: '时间', text: cardinal(time[1]) +
         (minute ? ' ' + (minute < 10 ? 'oh ' + ONES[minute] : cardinal(minute)) : '') +
         ' ' + time[3].toLowerCase().split('').join(' ') };
+    }
+    var clock = /^(\d{1,2}):(\d{2})$/.exec(value);
+    if (clock && Number(clock[1]) < 24 && Number(clock[2]) < 60) {
+      return { kind: '时间', text: cardinal(clock[1]) + (Number(clock[2]) ? ' ' +
+        (Number(clock[2]) < 10 ? 'oh ' + ONES[Number(clock[2])] : cardinal(clock[2])) : " o'clock") };
     }
     var money = /^(\$|£)(\d+)(?:\.(\d{1,2}))?$/.exec(value) || /^(\d+)(?:\.(\d{1,2}))?(\$|£)$/.exec(value);
     if (money) {
@@ -72,6 +77,8 @@
       return { kind: '金额', text: cardinal(whole) + ' ' + major + (Number(whole) === 1 ? '' : 's') +
         (cents ? ' and ' + cardinal(cents) + ' ' + minor : '') };
     }
+    var percentage = /^(\d+(?:\.\d+)?)\s*%$/.exec(value);
+    if (percentage) return { kind: '百分比', text: forAnswer(percentage[1], 'cardinal').text + ' percent' };
     var decimal = /^(\d+)\.(\d+)$/.exec(value);
     if (decimal) return { kind: '小数', text: cardinal(decimal[1]) + ' point ' +
       decimal[2].split('').map(function (digit) { return ONES[Number(digit)]; }).join(' ') };
@@ -79,8 +86,9 @@
       return { kind: mode === 'cardinal' && /^\d+$/.test(value) ? '数值' : '数字串',
         text: mode === 'cardinal' && /^\d+$/.test(value) ? cardinal(value) : digits(value) };
     }
-    var quantity = /^(\d+)\s+(weeks?|days?|months?|years?|dollars?|pounds?|minutes?|hours?|percent)$/i.exec(value);
-    if (quantity) return { kind: '数量短语', text: cardinal(quantity[1]) + ' ' + quantity[2] };
+    var quantity = /^(\d+(?:\.\d+)?)\s*(cm|weeks?|days?|months?|years?|dollars?|pounds?|minutes?|hours?|percent|million|millions|adults?)$/i.exec(value);
+    if (quantity) return { kind: '数量短语', text: forAnswer(quantity[1], 'cardinal').text + ' ' +
+      (quantity[2].toLowerCase() === 'cm' ? 'centimetres' : quantity[2]) };
     if (/\d/.test(value)) return { kind: '含数字短语（按原文）', text: value };
     return { kind: '单词 / 短语', text: value };
   }

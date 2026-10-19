@@ -40,6 +40,47 @@ async function listenText(page) {
 (async () => {
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
   try {
+    await test(browser, 'all 74 days and 161 PDF groups render with their source counts', async page => {
+      const expected = JSON.parse(fs.readFileSync(path.join(root, 'data/jijing.json'), 'utf8'));
+      assert.equal(await page.locator('#jDay option').count(), 235);
+      for (const entry of expected.days.concat(expected.collections)) {
+        await page.locator('#jDay').selectOption(String(entry.day));
+        assert.equal(await page.locator('[data-jpick]').count(), entry.items.length, String(entry.day));
+        assert.match(await page.locator('.j-alignment').innerText(), new RegExp(entry.year + '机经词汇.pdf'));
+      }
+    });
+    await test(browser, 'practice-only alignment is prominent; video ranges retain repeated groups', async page => {
+      await page.locator('#jDay').selectOption('48');
+      assert.match(await page.locator('.j-alignment[role="note"]').innerText(), /练习编排，未核对原录音/);
+      await page.locator('#jDay').selectOption('91');
+      assert.match(await page.locator('.j-alignment').innerText(), /题组 11.6、11.11、11.20、11.27/);
+      await page.locator('#jDay').selectOption('101');
+      assert.match(await page.locator('.j-alignment').innerText(), /题组 4.23、4.30/);
+      assert.equal(await page.locator('[data-jpick]').count(), 40);
+      await page.screenshot({ path: path.join(output, 'day101-desktop.png'), fullPage: false });
+    });
+    await test(browser, 'PDF source-only selection persists and can be graded without a fabricated Day', async page => {
+      await page.locator('#jDay').selectOption('pdf-2022-44');
+      await page.reload();
+      assert.equal(await page.locator('#jDay').inputValue(), 'pdf-2022-44');
+      assert.match(await page.locator('.j-heading').innerText(), /PDF · 2022 · 12.31/);
+      await page.locator('[data-jsingle]').first().click();
+      assert.match(await page.locator('.quiz-top').innerText(), /PDF · 2022 · 12.31/);
+      await page.locator('#jAnswer').fill('125');
+      await page.locator('[data-jsubmit]').click();
+      assert.equal(await page.locator('.result-box.ok').count(), 1);
+    });
+    await test(browser, 'existing pilot wrong-item history remains usable after extension', async page => {
+      assert.equal(await page.locator('#jDay').inputValue(), '30');
+      await page.locator('#mainTabs [data-route="wrong"]').click();
+      assert.match(await page.locator('.wrong-item').innerText(), /bak door → back door/);
+      const before = await page.evaluate(() => JSON.parse(localStorage.getItem('ieltsJijing.v1')).records);
+      await page.locator('#mainTabs [data-route="learn"]').click();
+      await page.locator('#jDay').selectOption('101');
+      assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('ieltsJijing.v1')).records), before);
+    }, { init: () => {
+      if (!localStorage.getItem('ieltsJijing.v1')) localStorage.setItem('ieltsJijing.v1', JSON.stringify({settings:{day:30},records:{'j2019-d05-003':{attempts:4,errors:2,wrong:true,lastInput:'bak door',lastReason:'拼写错误'}}}));
+    } });
     await test(browser, 'library switch and persisted Day selection', async page => {
       assert.equal(await page.locator('[data-jpick]').count(), 40);
       assert.equal(await page.locator('#jijingLibrary').innerText(), '机经词');

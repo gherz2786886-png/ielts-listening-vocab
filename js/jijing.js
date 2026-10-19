@@ -3,6 +3,7 @@
   'use strict';
   var data = global.JIJING;
   if (!data || !data.days || !data.days.length) return;
+  var collections = data.days.concat(data.collections || []);
   var app = document.getElementById('app');
   var KEY = 'ieltsJijing.v1';
   var unreadable = false;
@@ -16,17 +17,17 @@
     }
   } catch (error) { unreadable = true; }
   var state = {
-    day: Number(saved.settings.day) || 28,
+    day: saved.settings.day || 28,
     accent: saved.settings.accent === 'us' ? 'us' : 'uk',
     numberMode: saved.settings.numberMode === 'cardinal' ? 'cardinal' : 'digits',
     order: saved.settings.order === 'random' ? 'random' : 'sequence',
     scope: 'selected', selection: {}, view: 'learn', session: null, pendingPlay: null
   };
   var items = {}, dayOf = {};
-  data.days.forEach(function (day) {
+  collections.forEach(function (day) {
     day.items.forEach(function (item) { items[item.id] = item; dayOf[item.id] = day; });
   });
-  if (!data.days.some(function (day) { return day.day === state.day; })) state.day = data.days[0].day;
+  if (!collections.some(function (day) { return String(day.day) === String(state.day); })) state.day = data.days[0].day;
 
   function esc(value) {
     return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -43,7 +44,8 @@
     try { localStorage.setItem(KEY, JSON.stringify(saved)); }
     catch (error) { message('机经学习记录未能保存，刷新或关闭页面可能丢失。'); }
   }
-  function currentDay() { return data.days.filter(function (day) { return day.day === state.day; })[0]; }
+  function currentDay() { return collections.filter(function (day) { return String(day.day) === String(state.day); })[0]; }
+  function label(day) { return day.label || 'Day' + day.day; }
   function wrongIds() {
     return Object.keys(saved.records).filter(function (id) {
       var record = saved.records[id];
@@ -67,12 +69,18 @@
   }
   function play(item) { playText(spoken(item).text); }
   function settingsHtml() {
-    var options = data.days.map(function (day) {
-      return '<option value="' + day.day + '"' + (day.day === state.day ? ' selected' : '') +
-        '>Day' + day.day + ' · ' + day.year + ' 年 Day' + day.sourceDay + '</option>';
-    }).join('');
+    function option(day) {
+      return '<option value="' + day.day + '"' + (String(day.day) === String(state.day) ? ' selected' : '') +
+        '>' + esc(label(day)) + (day.sourceDay ? ' · ' + day.year + ' 年 Day' + day.sourceDay : '') +
+        (day.status === 'practice' ? ' · 练习编排' : '') + '</option>';
+    }
+    var options = '<optgroup label="每日练习 · Day28–Day101">' + data.days.map(option).join('') + '</optgroup>';
+    [2019, 2020, 2021, 2022].forEach(function (year) {
+      var groups = (data.collections || []).filter(function (group) { return group.year === year; });
+      if (groups.length) options += '<optgroup label="PDF 题组 · ' + year + '">' + groups.map(option).join('') + '</optgroup>';
+    });
     return '<div class="j-controls">' +
-      '<label>打卡日<select class="select" id="jDay">' + options + '</select></label>' +
+      '<label>打卡日 / PDF 题组<select class="select" id="jDay">' + options + '</select></label>' +
       '<label>口音<select class="select" id="jAccent"><option value="uk"' +
         (state.accent === 'uk' ? ' selected' : '') + '>英音</option><option value="us"' +
         (state.accent === 'us' ? ' selected' : '') + '>美音</option></select></label>' +
@@ -91,7 +99,14 @@
   function renderLearn() {
     var day = currentDay();
     var selected = selectedIds();
-    var html = '<h1 class="j-heading">机经词 · Day' + day.day + '</h1>' + settingsHtml() +
+    var source = data.sources ? data.sources[String(day.year)] : data.source;
+    var html = '<h1 class="j-heading">机经词 · ' + esc(label(day)) + '</h1>' + settingsHtml() +
+      '<p class="result-meta">Day28–Day101 · 74 个练习日；也可从下拉框直接选择 PDF 题组。</p>' +
+      '<div class="panel j-alignment"' + (day.status === 'practice' ? ' role="note"' : '') + '><b>' +
+      (day.status === 'practice' ? '练习编排，未核对原录音' : day.status === 'video' ? '已核对视频题组范围' :
+        day.status === 'source' ? 'PDF 原题组' : '按 PDF 题组顺序编排') + '</b><p>' + esc(day.alignment) +
+      '</p><p>' + esc(source.file) + ' · 第 ' + day.pages.join('、') + ' 页' +
+      (day.groups ? ' · 题组 ' + esc(day.groups.join('、')) : '') + ' · ' + day.items.length + ' 项</p></div>' +
       '<p class="result-meta">原文答案逐项练习；单词使用词典发音，数字先转换读法。语音可能回退到浏览器合成。</p>' +
       '<div class="j-toolbar"><button class="btn btn-ghost" data-jselect-all>全选</button>' +
       '<button class="btn btn-ghost" data-jselect-none>清空选择</button>' +
@@ -107,16 +122,16 @@
       return '<article class="word-card"><div class="word-head">' +
         '<label class="j-pick"><input type="checkbox" data-jpick="' + item.id + '"' +
           (state.selection[item.id] !== false ? ' checked' : '') + '><span class="word-display">' + esc(item.answer) + '</span></label>' +
-        '<span class="wrong-tags">' + item.part + '</span></div>' +
+        '<span class="wrong-tags">' + esc(item.group || '') + ' · ' + item.part + '</span></div>' +
         '<p class="j-reading">' + esc(reading.kind) + ' · ' + esc(reading.text) + '</p>' +
         '<div class="wrong-actions"><button class="speak-btn" data-jplay="' + item.id + '">播放</button>' +
         '<button class="btn btn-ghost btn-sm" data-jsingle="' + item.id + '">单项听写</button>' +
         '<button class="btn btn-ghost btn-sm" data-jmark="' + item.id + '">' +
           (record && record.wrong && !record.mastered ? '已在机经错词本' : '加入错词本') + '</button></div></article>';
     }).join('') + '</div>';
-    html += '<details class="panel"><summary>来源与编排说明</summary><p>' + esc(data.source.file) +
+    html += '<details class="panel"><summary>来源与编排说明</summary><p>' + esc(source.file) +
       '，PDF 第 ' + day.pages.join('、') + ' 页。' + esc(day.alignment) +
-      '</p><p>本版已核对 Day28–Day30 共 110 条原文记录，含重复词和专有名词；专有名词读音仍需结合原资料核对。</p>' +
+      '</p><p>保留重复词、专有名词和来源拼写；专有名词及含数字混合短语的读音仍需结合原资料核对。PDF 题组入口也包含每日范围以外的内容。</p>' +
       '<pre class="j-source">' + esc(day.sourceText) + '</pre></details>';
     app.innerHTML = html;
   }
@@ -161,7 +176,7 @@
     if (!session) {
       app.innerHTML = '<h1 class="j-heading">机经听写设置</h1>' + settingsHtml() +
         '<div class="panel j-setup"><label>范围<select class="select" id="jScope">' +
-        [['selected', '学习页所选（' + selectedIds().length + '）'], ['day', '当前 Day 全部'],
+        [['selected', '学习页所选（' + selectedIds().length + '）'], ['day', '当前练习全部'],
           ['wrong', '机经错词本（' + wrongIds().length + '）']].map(function (option) {
           return '<option value="' + option[0] + '"' + (state.scope === option[0] ? ' selected' : '') + '>' + option[1] + '</option>';
         }).join('') + '</select></label><label>顺序<select class="select" id="jOrder">' +
@@ -183,7 +198,7 @@
     var day = dayOf[item.id];
     var result = session.result;
     app.innerHTML = '<div class="panel"><div class="quiz-top"><span>第 ' + (session.index + 1) + ' / ' + session.ids.length +
-      ' 题 · Day' + day.day + ' · ' + item.part + '</span><button class="btn btn-ghost btn-sm" data-jend>结束本轮</button></div>' +
+      ' 题 · ' + esc(label(day)) + ' · ' + item.part + '</span><button class="btn btn-ghost btn-sm" data-jend>结束本轮</button></div>' +
       '<p class="result-meta">' + (state.accent === 'uk' ? '英音' : '美音') + ' · ' +
       (state.numberMode === 'digits' ? '数字串用 double / triple' : '纯数字按数值读') + '；数字答案填写数字。</p>' +
       '<button class="btn replay-btn" data-jreplay>重听当前项</button>' +
@@ -205,15 +220,15 @@
       '<button class="btn btn-primary" data-jwrong-start' + (ids.length ? '' : ' disabled') + '>重练全部（' + ids.length + '）</button></div>' +
       (ids.length ? ids.map(function (id) {
         var item = items[id], record = saved.records[id];
-        return '<article class="wrong-item"><div class="wrong-item-top"><b>' + esc(item.answer) + '</b><span class="wrong-tags">Day' +
-          dayOf[id].day + ' · ' + item.part + ' · ' + (record.errors ? '错 ' + record.errors + ' 次' : '手动标记') + '</span></div>' +
+        return '<article class="wrong-item"><div class="wrong-item-top"><b>' + esc(item.answer) + '</b><span class="wrong-tags">' +
+          esc(label(dayOf[id])) + ' · ' + item.part + ' · ' + (record.errors ? '错 ' + record.errors + ' 次' : '手动标记') + '</span></div>' +
           (record.lastReason ? '<p class="wrong-reason">' + esc(record.lastInput) + ' → ' + esc(item.answer) + '：' + esc(record.lastReason) + '</p>' : '') +
           '<div class="wrong-actions"><button class="speak-btn" data-jplay="' + id + '">播放</button>' +
           '<button class="btn btn-sm" data-jsingle="' + id + '">单项重练</button>' +
           '<button class="btn btn-sm" data-jmaster="' + id + '">已掌握</button></div></article>';
       }).join('') : '<p class="empty-state">还没有机经错词。听写出错会自动收录，也可在学习页手动添加。</p>') +
       (mastered.length ? '<details class="panel"><summary>已掌握（' + mastered.length + '）</summary>' + mastered.map(function (id) {
-        return '<div class="j-toolbar"><span>' + esc(items[id].answer) + ' · Day' + dayOf[id].day +
+        return '<div class="j-toolbar"><span>' + esc(items[id].answer) + ' · ' + esc(label(dayOf[id])) +
           '</span><button class="btn btn-sm" data-junmaster="' + id + '">移回错词本</button></div>';
       }).join('') + '</details>' : '');
   }
@@ -296,7 +311,7 @@
       startButton.disabled = !count; startButton.textContent = '听写所选（' + count + '）';
       return;
     }
-    if (target.id === 'jDay') state.day = Number(target.value);
+    if (target.id === 'jDay') state.day = /^\d+$/.test(target.value) ? Number(target.value) : target.value;
     else if (target.id === 'jAccent') state.accent = target.value;
     else if (target.id === 'jNumberMode') state.numberMode = target.value;
     else if (target.id === 'jScope') state.scope = target.value;

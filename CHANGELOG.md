@@ -25,3 +25,13 @@ Recovery point: `e254c108f2e3e03c2d8675816db9e474b891cb20`. Keep the review on i
 - Play multiword readouts as cancellable dictionary-clip sequences; add generic playback/stop feedback without revealing quiz answers.
 - Version script/style URLs to prevent mixing cached audio and new item modules.
 - Preserve source text, duplicate entries and explicit alignment limitations; do not upload or delete original media.
+
+## 2026-10-19 — Complete Day28–101 text practice
+
+- Extend to 74 days / 3,018 daily records and expose 161 source groups / 3,553 overlapping source records.
+- Preserve all pilot IDs and scene data. Label 27 user-approved sequential study days prominently; preserve the video-verified later ranges and repeated groups.
+- Add source-only selection, persistence and grading through the end of the 2022 PDF without inventing extra check-in days.
+- Handle percent, centimetre quantities, decimal quantities and explicit dotted/colon time formats; retain source spelling and audit text.
+- Add a reproducible full-source generator and release asset version. Original media and system settings are untouched.
+
+Validation: 53 pronunciation/grading cases, 26 source assertions, 16 Jijing browser workflows, 17 audio regressions and all prior scene/grading suites pass. Full mapping, performance sample, extraction repairs and rollback are recorded in JIJING_FULL_REVIEW.md.

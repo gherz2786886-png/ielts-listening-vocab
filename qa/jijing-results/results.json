@@ -1,5 +1,21 @@
 [
   {
+    "name": "all 74 days and 161 PDF groups render with their source counts",
+    "passed": true
+  },
+  {
+    "name": "practice-only alignment is prominent; video ranges retain repeated groups",
+    "passed": true
+  },
+  {
+    "name": "PDF source-only selection persists and can be graded without a fabricated Day",
+    "passed": true
+  },
+  {
+    "name": "existing pilot wrong-item history remains usable after extension",
+    "passed": true
+  },
+  {
     "name": "library switch and persisted Day selection",
     "passed": true
   },

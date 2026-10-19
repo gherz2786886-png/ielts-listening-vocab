@@ -819,6 +819,10 @@ body {
 .j-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
 .j-controls label, .j-setup label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; }
 .j-controls .select { max-width: 100%; }
+.j-controls label { min-width: 0; max-width: 100%; }
+.j-alignment { font-size: 13px; overflow-wrap: anywhere; }
+.j-alignment p { margin: 6px 0 0; }
+.j-alignment[role="note"] { border-left: 4px solid #b87716; background: #fff9ed; }
 .j-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
 .j-number-demo { margin: 14px 0; }
 .j-number-demo .input { flex: 1; min-width: 100px; width: 140px; }
