@@ -1,0 +1,47 @@
+| # | 案例 | 所填 | 答案 | accepted | 类别 | reasonCn | 结果 |
+|---|------|------|------|----------|------|-----------|------|
+| 1 | 已有#1 完全正确 | adults | adults | true |  | 拼写正确 | PASS |
+| 2 | 已有#2 accomodate漏m应双写 | accomodate | accommodate | false | del/double | 双写错误：字母 m 应双写 | PASS |
+| 3 | 已有#3 freinds颠倒 | freinds | friends | false | trans | 相邻字母 i、e 顺序颠倒 | PASS |
+| 4 | 已有#4 ned漏e | ned | need | false | del | 漏写了字母 e | PASS |
+| 5 | 已有#5 dormidory t→d | dormidory | dormitory | false | sub | 把 t 写成了 d | PASS |
+| 6 | 已有#6 bocket u→o | bocket | bucket | false | sub | 把 u 写成了 o | PASS |
+| 7 | 已有#7 untill多l | untill | until | false | ins/double | 双写错误：多写了一个 l | PASS |
+| 8 | 已有#8 teh颠倒 | teh | the | false | trans | 相邻字母 h、e 顺序颠倒 | PASS |
+| 9 | 已有#9 stoped p应双写 | stoped | stopped | false | del/double | 双写错误：字母 p 应双写 | PASS |
+| 10 | 已有#10 begining n应双写 | begining | beginning | false | del/double | 双写错误：字母 n 应双写 | PASS |
+| 11 | 已有#11 acter后缀 | acter | actor | false | sub/suffix | 后缀混淆：-or 与 -er | PASS |
+| 12 | 已有#12 collecter后缀 | collecter | collector | false | sub/suffix | 后缀混淆：-or 与 -er | PASS |
+| 13 | 已有#13 colour/color英美判对 | colour | color | true | ukus | 英式 -our 对应美式 -or（如 colour/color、neighbour/neighbor），两种拼写都算对 | PASS |
+| 14 | 已有#14 organise/organize英美 | organise | organize | true | ukus | 英式 -ise 对应美式 -ize（如 organise/organize、realise/realize），两种拼写都算对 | PASS |
+| 15 | 已有#15 cheque/check英美 | cheque | check | true | ukus | 英式 -que 对应美式 -ck（如 cheque/check），两种拼写都算对 | PASS |
+| 16 | 已有#16 centre/center英美 | centre | center | true | ukus | 英式 -re 对应美式 -er（如 centre/center、theatre/theater），两种拼写都算对 | PASS |
+| 17 | 已有#17 travelling/traveling英美 | travelling | traveling | true | ukus | 英式双写 l 现在分词对应美式单写 l（如 travelling/traveling），两种拼写都算对 | PASS |
+| 18 | 已有#18 nife不发音k | nife | knife | false | del/silent | 漏写了不发音字母 k（kn- 开头的 k 不发音） | PASS |
+| 19 | 已有#19 clime不发音b | clime | climb | false | sub/silent | 漏写了不发音字母 b（词尾 -mb 的 b 不发音） | PASS |
+| 20 | 已有#20 full time→full-time格式 |  full time  | full-time | true | punct | 大小写/空格/连字符问题，已按正确处理 | PASS |
+| 21 | 已有#21 ADULTS大小写 | ADULTS | adults | true | case | 大小写/空格/连字符问题，已按正确处理 | PASS |
+| 22 | 已有#22 day shift多空格折叠 |   day   shift  | day shift | true | space | 大小写/空格/连字符问题，已按正确处理 | PASS |
+| 23 | 已有#23 dayshift漏空格判对 | dayshift | day shift | true | space | 短语空格差异（漏/多了空格），已按正确处理 | PASS |
+| 24 | 已有#24 admistration连续漏写 | admistration | administration | false | del | 漏写了字母 i；漏写了字母 n | PASS |
+| 25 | 新#1 resturant少a | resturant | restaurant | false | del | 漏写了字母 a | PASS |
+| 26 | 新#2 accomodation少m应双写 | accomodation | accommodation | false | del/double | 双写错误：字母 m 应双写 | PASS |
+| 27 | 新#3 wensday漏d | wensday | wednesday | false | del | 漏写了字母 d；漏写了字母 e | PASS |
+| 28 | 新#4 libary漏r | libary | library | false | del | 漏写了字母 r | PASS |
+| 29 | 新#5 neccessary多c | neccessary | necessary | false | ins/double | 双写错误：多写了一个 c | PASS |
+| 30 | 新#6 behaviour/behavior英美判对 | behavior | behaviour | true | ukus | 英式 -our 对应美式 -or（如 colour/color、neighbour/neighbor），两种拼写都算对 | PASS |
+| 31 | 新#7 litre/liter英美判对 | liter | litre | true | ukus | 英式 -re 对应美式 -er（如 centre/center、theatre/theater），两种拼写都算对 | PASS |
+| 32 | 新#8 catalog/catalogue英美判对 | catalog | catalogue | true | ukus | 英式 -ogue 对应美式 -og（如 catalogue/catalog），两种拼写都算对 | PASS |
+| 33 | 新#9 freindly ie/ei颠倒 | freindly | friendly | false | trans | 相邻字母 i、e 顺序颠倒 | PASS |
+| 34 | 新#10 seperate a→e | seperate | separate | false | sub | 把 a 写成了 e | PASS |
+| 35 | 新#11 definately i→a | definately | definitely | false | sub | 把 i 写成了 a | PASS |
+| 36 | 新#12 goverment漏n | goverment | government | false | del | 漏写了字母 n | PASS |
+| 37 | 新#13 enviroment漏n | enviroment | environment | false | del | 漏写了字母 n | PASS |
+| 38 | 新#14 recieve ie/ei颠倒 | recieve | receive | false | trans | 相邻字母 e、i 顺序颠倒 | PASS |
+| 39 | 新#15 beleive ie/ei颠倒 | beleive | believe | false | trans | 相邻字母 i、e 顺序颠倒 | PASS |
+| 40 | 新#16 nationalholidays漏空格判对 | nationalholidays | national holidays | true | space | 短语空格差异（漏/多了空格），已按正确处理 | PASS |
+| 41 | 新#17 full time job→full-time job连字符判对 | full time job | full-time job | true | punct | 大小写/空格/连字符问题，已按正确处理 | PASS |
+
+--- 失败案例明细 ---
+
+通过 41 / 41
