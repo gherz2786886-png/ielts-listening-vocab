@@ -19,7 +19,6 @@
   var state = {
     day: saved.settings.day || 28,
     accent: saved.settings.accent === 'us' ? 'us' : 'uk',
-    numberMode: saved.settings.numberMode === 'cardinal' ? 'cardinal' : 'digits',
     order: saved.settings.order === 'random' ? 'random' : 'sequence',
     scope: 'selected', selection: {}, view: 'learn', session: null, pendingPlay: null
   };
@@ -40,7 +39,7 @@
   }
   function persist() {
     if (unreadable) { message('原有机经记录无法读取，本次未覆盖原数据。'); return; }
-    saved.settings = { day: state.day, accent: state.accent, numberMode: state.numberMode, order: state.order };
+    saved.settings = { day: state.day, accent: state.accent, order: state.order };
     try { localStorage.setItem(KEY, JSON.stringify(saved)); }
     catch (error) { message('机经学习记录未能保存，刷新或关闭页面可能丢失。'); }
   }
@@ -61,7 +60,7 @@
     return currentDay().items.filter(function (item) { return state.selection[item.id] !== false; })
       .map(function (item) { return item.id; });
   }
-  function spoken(item) { return global.JijingSpeech.forAnswer(item.answers[0], state.numberMode); }
+  function spoken(item) { return global.JijingSpeech.forAnswer(item.answers[0], { part: item.part }); }
   function playText(text) {
     var parts = global.JijingSpeech.audioParts(text);
     if (parts.length > 1) global.VocabAudio.playSequence(parts, state.accent).catch(function () {});
@@ -83,10 +82,7 @@
       '<label>打卡日 / PDF 题组<select class="select" id="jDay">' + options + '</select></label>' +
       '<label>口音<select class="select" id="jAccent"><option value="uk"' +
         (state.accent === 'uk' ? ' selected' : '') + '>英音</option><option value="us"' +
-        (state.accent === 'us' ? ' selected' : '') + '>美音</option></select></label>' +
-      '<label>纯数字读法<select class="select" id="jNumberMode"><option value="digits"' +
-        (state.numberMode === 'digits' ? ' selected' : '') + '>号码 · double / triple</option><option value="cardinal"' +
-        (state.numberMode === 'cardinal' ? ' selected' : '') + '>数值 · thirty-three</option></select></label></div>';
+        (state.accent === 'us' ? ' selected' : '') + '>美音</option></select></label></div>';
   }
   function markWrong(id, result, input) {
     var record = saved.records[id] || { attempts: 0, errors: 0 };
@@ -107,14 +103,14 @@
         day.status === 'source' ? 'PDF 原题组' : '按 PDF 题组顺序编排') + '</b><p>' + esc(day.alignment) +
       '</p><p>' + esc(source.file) + ' · 第 ' + day.pages.join('、') + ' 页' +
       (day.groups ? ' · 题组 ' + esc(day.groups.join('、')) : '') + ' · ' + day.items.length + ' 项</p></div>' +
-      '<p class="result-meta">原文答案逐项练习；单词使用词典发音，数字先转换读法。语音可能回退到浏览器合成。</p>' +
+      '<p class="result-meta">自动识别金额、数量和号码；编码逐位读字母与数字，号码重复数字用 double / triple。语音可能回退到浏览器合成。</p>' +
       '<div class="j-toolbar"><button class="btn btn-ghost" data-jselect-all>全选</button>' +
       '<button class="btn btn-ghost" data-jselect-none>清空选择</button>' +
       '<button class="btn btn-primary" data-jstart-selected' + (selected.length ? '' : ' disabled') +
       '>听写所选（' + selected.length + '）</button></div>' +
-      '<details class="panel j-number-demo"><summary>数字读法试播</summary>' +
-      '<label for="jDemo">输入数字（不加入词库）</label><div class="j-toolbar">' +
-      '<input class="input" id="jDemo" value="33" maxlength="32" inputmode="decimal">' +
+      '<details class="panel j-number-demo"><summary>自动读法试播</summary>' +
+      '<label for="jDemo">输入号码、编码或金额（不加入词库）</label><div class="j-toolbar">' +
+      '<input class="input" id="jDemo" value="AC832T" maxlength="128">' +
       '<button class="btn" data-jdemo>试播读法</button></div><output id="jDemoText" aria-live="polite"></output></details>';
     html += '<div class="word-list">' + day.items.map(function (item) {
       var reading = spoken(item);
@@ -200,7 +196,7 @@
     app.innerHTML = '<div class="panel"><div class="quiz-top"><span>第 ' + (session.index + 1) + ' / ' + session.ids.length +
       ' 题 · ' + esc(label(day)) + ' · ' + item.part + '</span><button class="btn btn-ghost btn-sm" data-jend>结束本轮</button></div>' +
       '<p class="result-meta">' + (state.accent === 'uk' ? '英音' : '美音') + ' · ' +
-      (state.numberMode === 'digits' ? '数字串用 double / triple' : '纯数字按数值读') + '；数字答案填写数字。</p>' +
+      '自动识别金额、数量和号码；数字答案填写数字，编码按原文填写。</p>' +
       '<button class="btn replay-btn" data-jreplay>重听当前项</button>' +
       (result ? '<div class="result-box ' + (result.accepted ? 'ok' : 'bad') + '"><p>' + esc(result.reasonCn) +
         '</p><div class="highlight-line">' + result.highlightHtml + '</div><p>原文答案：<b>' + esc(item.answer) +
@@ -295,9 +291,9 @@
     }
     if (event.target.closest('[data-jdemo]')) {
       var value = document.getElementById('jDemo').value.trim();
-      if (!/^\d[\d .()-]{0,31}$/.test(value)) { message('试播区请输入数字、小数或号码。'); return; }
-      var reading = global.JijingSpeech.forAnswer(value, state.numberMode);
-      document.getElementById('jDemoText').textContent = value + ' → ' + reading.text;
+      if (!/\d/.test(value) || value.length > 128 || /[<>]/.test(value)) { message('请输入含数字的号码、编码或金额，最多 128 个字符。'); return; }
+      var reading = global.JijingSpeech.forAnswer(value);
+      document.getElementById('jDemoText').textContent = value + ' → ' + reading.text + '（自动识别：' + reading.kind + '）';
       playText(reading.text);
     }
   });
@@ -313,7 +309,6 @@
     }
     if (target.id === 'jDay') state.day = /^\d+$/.test(target.value) ? Number(target.value) : target.value;
     else if (target.id === 'jAccent') state.accent = target.value;
-    else if (target.id === 'jNumberMode') state.numberMode = target.value;
     else if (target.id === 'jScope') state.scope = target.value;
     else if (target.id === 'jOrder') state.order = target.value;
     else return;

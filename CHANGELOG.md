@@ -35,3 +35,12 @@ Recovery point: `e254c108f2e3e03c2d8675816db9e474b891cb20`. Keep the review on i
 - Add a reproducible full-source generator and release asset version. Original media and system settings are untouched.
 
 Validation: 53 pronunciation/grading cases, 26 source assertions, 16 Jijing browser workflows, 17 audio regressions and all prior scene/grading suites pass. Full mapping, performance sample, extraction repairs and rollback are recorded in JIJING_FULL_REVIEW.md.
+
+## 2026-10-19 — Automatic number/code reading fix
+
+- Remove the digits/cardinal UI and ignore obsolete saved preferences.
+- Automatically distinguish explicit money, dates, quantities, long/labelled numbers and alphanumeric identifiers. Spell letter/digit codes with double/triple for repeated digits; retain leading zeros and address words.
+- Read monetary decimals as major/minor currency units; prioritize money over number length. Unlabelled short integers use cardinal values.
+- Broaden the trial input to codes, numbers and amounts; show the detected type without changing vocabulary or answer records.
+
+Validation: 92 reading/grading cases, 26 source assertions, 16 Jijing browser workflows, 17 audio regressions and all prior scene/grading suites pass. Rules and limitations are recorded in AUTO_NUMBER_REVIEW.md.
