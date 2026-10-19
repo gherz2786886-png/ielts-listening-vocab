@@ -54,4 +54,3 @@ This review is developed on `codex/vocab-reliability-review`; the baseline is pr
 ## Process improvements
 
 The overflow assertion alone missed vertical navigation text. The regression now checks text height as well as document width, and screenshots are visually inspected. Future review must verify the rendered result in addition to an automated pass count.
-
