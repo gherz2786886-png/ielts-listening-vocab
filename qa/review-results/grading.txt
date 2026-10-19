@@ -1,0 +1,32 @@
+PASS en dash
+PASS em dash
+PASS non-breaking space
+PASS narrow non-breaking space
+PASS ideographic space
+PASS line break
+PASS tab
+PASS answer contains Unicode dash
+PASS case and Unicode separators
+PASS exact phrase retains its space
+PASS exact hyphen retains its hyphen
+PASS reject flower misspelling
+PASS reject singer misspelling
+PASS reject teacher misspelling
+PASS reject fence misspelling
+PASS reject exercise misspelling
+PASS reject France misspelling
+PASS reject painkiller misspelling
+PASS reject full suffix replacement
+PASS grey to gray
+PASS gray to grey
+PASS tyre to tire
+PASS variant in middle of phrase
+PASS multiple phrase variants
+PASS variant plus unrelated typo
+PASS corpus socialise
+PASS corpus summarise
+PASS known inflection
+PASS known verb inflection
+PASS known noun inflection
+PASS escape markup
+Passed 31/31

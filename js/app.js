@@ -9,6 +9,15 @@
 
   var VOCAB = window.VOCAB;
   var appEl = document.getElementById('app');
+  var storageReadFailures = {};
+
+  function notify(message, storageError) {
+    var notice = document.getElementById('appNotice');
+    if (!notice || (notice.dataset.storageError && !storageError)) return;
+    notice.textContent = message;
+    notice.hidden = !message;
+    if (storageError) notice.dataset.storageError = 'true';
+  }
 
   function fatal(msg) {
     appEl.innerHTML = '<div class="empty-state"><div class="big">页面数据未就绪</div><p>' +
@@ -34,12 +43,22 @@
       var raw = localStorage.getItem(key);
       if (!raw) return fallback;
       var v = JSON.parse(raw);
-      return (v && typeof v === 'object') ? v : fallback;
-    } catch (e) { return fallback; }
+      if (v && typeof v === 'object' && !Array.isArray(v)) return v;
+      throw new Error('Invalid saved data');
+    } catch (e) {
+      storageReadFailures[key] = true;
+      notify('学习记录暂时无法读取。请保留当前浏览器数据，检查浏览器的存储权限。', true);
+      return fallback;
+    }
   }
 
   function saveJSON(key, val) {
-    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+    if (storageReadFailures[key]) {
+      notify('原有学习记录无法读取，本次未覆盖原数据。请先保留浏览器数据，再检查存储权限或记录文件。', true);
+      return;
+    }
+    try { localStorage.setItem(key, JSON.stringify(val)); }
+    catch (e) { notify('本次学习记录未能保存，刷新或关闭页面可能丢失。请检查浏览器存储空间和权限。', true); }
   }
 
   function shuffle(arr) {
@@ -117,7 +136,8 @@
     wPop: null,     // 学习页错因面板：{wordId, draft:[]}，同时只开一个
     wrongReasonFilter: 'all', // 错词本错因筛选：all|meaning|spelling|listening
     wrongFilter: 'all',       // 错词本场景筛选
-    showMastered: false       // 错词本是否展开已掌握区
+    showMastered: false,      // 错词本是否展开已掌握区
+    quizTimer: null
   };
 
   function persistViewSettings() {
@@ -179,6 +199,12 @@
 
   if (document.addEventListener) {
     document.addEventListener('vocab-audio-state', refreshSpeakButtons);
+    document.addEventListener('vocab-audio-fallback', function () {
+      notify('在线发音暂不可用，已切换为浏览器语音；实际口音和离线可用性取决于已安装的语音。');
+    });
+    document.addEventListener('vocab-audio-error', function () {
+      notify('暂时无法播放发音，请再次点击重听，或检查浏览器的声音设置。');
+    });
   }
 
   /* ---------------- 错词本写入 ---------------- */
@@ -293,6 +319,14 @@
     var ipa = [];
     if (w.ipaUk) ipa.push('英 ' + w.ipaUk);
     if (w.ipaUs) ipa.push('美 ' + w.ipaUs);
+    var sourceNotes = {
+      'review': '原 PDF 音标疑误：此行印成 hotel 的音标。',
+      'honey': '原 PDF 音标疑误：印刷音标与此词不对应。',
+      'alone': '原 PDF 音标疑误：此行与 recording 音标相同。',
+      'foot(feet)': '原 PDF 美音列标的是复数 feet 的读音。',
+      'crossroads/crossing': '原 PDF 美音音标不完整。'
+    };
+    var sourceNote = sourceNotes[w.display] || '';
     var hwBtns = '';
     (w.headwords || []).forEach(function (hw) {
       hwBtns +=
@@ -343,6 +377,7 @@
           hwBtns +
           (ipa.length ? '<span class="ipa">' + esc(ipa.join(' · ')) + '</span>' : '') +
         '</div>' +
+        (sourceNote ? '<p class="source-note">' + esc(sourceNote) + ' 保留原文供对照，请结合发音学习。</p>' : '') +
         popHtml +
       '</div>';
   }
@@ -452,8 +487,12 @@
   function afterLearnRender() {
     var si = document.getElementById('searchInput');
     if (si) {
-      si.focus();
-      si.addEventListener('input', function () {
+      si.addEventListener('input', function (event) {
+        state.query = si.value;
+        if (event.isComposing) return;
+        renderLearnKeepFocus();
+      });
+      si.addEventListener('compositionend', function () {
         state.query = si.value;
         renderLearnKeepFocus();
       });
@@ -490,9 +529,20 @@
   }
 
   function playCurrentTarget() {
+    clearQuizTimer();
     var item = currentTargetItem();
-    if (!item || !window.VocabAudio) return;
+    if (state.route !== 'dictation' || !item || !window.VocabAudio) return;
     VocabAudio.play(item.target, state.dSetup.accent).catch(function () {});
+  }
+
+  function clearQuizTimer() {
+    if (state.quizTimer !== null) clearTimeout(state.quizTimer);
+    state.quizTimer = null;
+  }
+
+  function stopQuizAudio() {
+    clearQuizTimer();
+    if (window.VocabAudio) VocabAudio.stop();
   }
 
   function buildQueue() {
@@ -528,7 +578,8 @@
 
     state.dSession = {
       queue: items, index: 0, correct: 0, exact: 0,
-      wrongNew: 0, result: null, finished: false
+      answered: 0, wrongNew: 0, result: null, finished: false,
+      rangeText: rangeLabel()
     };
   }
 
@@ -543,19 +594,23 @@
     }
   }
 
-  function renderDictation() {
+  function renderDictation(replay) {
+    clearQuizTimer();
     var s = state.dSession;
 
     // ---- 一轮结束：成绩页 ----
     if (s && s.finished) {
-      var total = s.queue.length;
+      stopQuizAudio();
+      var total = s.answered;
+      var remaining = s.queue.length - total;
       var accPct = total ? Math.round(s.correct / total * 100) : 0;
       appEl.innerHTML =
         '<div class="panel">' +
-          '<h2 style="margin:0 0 4px">本轮完成</h2>' +
-          '<p style="margin:0 0 8px;color:var(--muted)">范围：' + esc(rangeLabel()) + '</p>' +
+          '<h2 style="margin:0 0 4px">' + (remaining ? '本轮已结束' : '本轮完成') + '</h2>' +
+          '<p style="margin:0 0 8px;color:var(--muted)">范围：' + esc(s.rangeText) + '</p>' +
+          '<p class="result-meta">已作答 ' + total + ' 题，未作答 ' + remaining + ' 题；正确率仅按已作答题计算。</p>' +
           '<div class="summary-stats">' +
-            '<div class="stat"><div class="stat-num good">' + s.correct + '</div><div class="stat-label">答对 / 共 ' + total + ' 题（' + accPct + '%）</div></div>' +
+            '<div class="stat"><div class="stat-num good">' + s.correct + '</div><div class="stat-label">答对 / 已答 ' + total + ' 题（' + (total ? accPct + '%' : '暂无成绩') + '）</div></div>' +
             '<div class="stat"><div class="stat-num">' + s.exact + '</div><div class="stat-label">完全拼写正确</div></div>' +
             '<div class="stat"><div class="stat-num bad">' + s.wrongNew + '</div><div class="stat-label">本轮新增错词</div></div>' +
           '</div>' +
@@ -674,12 +729,10 @@
       '</div>';
 
     var qi = document.getElementById('quizInput');
-    if (qi) {
-      setTimeout(function () { qi.focus(); }, 60);
-    }
+    if (qi) qi.focus();
     // 自动播放当前题（开始/下一题时触发）
-    if (!s.result) {
-      setTimeout(playCurrentTarget, 250);
+    if (!s.result || replay) {
+      state.quizTimer = setTimeout(playCurrentTarget, 250);
     }
     refreshSpeakButtons();
   }
@@ -695,7 +748,9 @@
       return;
     }
     var res = Dictation.check(raw, item.target);
+    stopQuizAudio();
     s.result = res;
+    s.answered++;
     if (res.accepted) {
       s.correct++;
       if (res.exact) s.exact++;
@@ -710,6 +765,7 @@
   function nextQuestion() {
     var s = state.dSession;
     if (!s || !s.result) return;
+    stopQuizAudio();
     s.index++;
     if (s.index >= s.queue.length) {
       s.finished = true;
@@ -802,6 +858,7 @@
             '<button class="speak-btn" type="button" data-speak="' + esc(e.headword) + '" data-accent="uk">英</button>' +
             '<button class="speak-btn" type="button" data-speak="' + esc(e.headword) + '" data-accent="us">美</button>' +
             '<button class="btn btn-ghost btn-sm" type="button" data-master="' + esc(e.headword) + '">标记已掌握</button>' +
+            '<button class="btn btn-ghost btn-sm" type="button" data-single-quiz="' + esc(e.headword) + '">单词重练</button>' +
           '</div>' +
         '</div>';
       }).join('');
@@ -844,6 +901,7 @@
   }
 
   function router() {
+    stopQuizAudio();
     var h = (location.hash || '#/learn').replace(/^#\/?/, '');
     var qi = h.indexOf('?');
     var route = qi >= 0 ? h.slice(0, qi) : h;
@@ -858,7 +916,7 @@
         var parts = kv.split('=');
         if (parts.length === 2) params[parts[0]] = parts[1];
       });
-      if (params.range) state.dSetup.range = params.range;
+      if (['scenario', 'page', 'all', 'wrong'].indexOf(params.range) >= 0) state.dSetup.range = params.range;
       if (params.from === 'wrong') state.dSetup.range = 'wrong';
       if (params.start === '1' || params.from === 'wrong') {
         persistViewSettings();
@@ -945,8 +1003,7 @@
       persistViewSettings();
       if (state.dSession && !state.dSession.finished) {
         // 切换口音后立即重放当前题（若已提交则重播答案）
-        renderDictation();
-        setTimeout(playCurrentTarget, 250);
+        renderDictation(true);
       } else {
         renderDictation();
       }
@@ -1077,6 +1134,17 @@
     t = e.target.closest('[data-wrong-quiz]');
     if (t) {
       location.hash = '#/dictation?from=wrong';
+      return;
+    }
+
+    t = e.target.closest('[data-single-quiz]');
+    if (t) {
+      state.dSetup.range = 'wrong';
+      buildQueue();
+      var headword = t.getAttribute('data-single-quiz');
+      state.dSession.queue = state.dSession.queue.filter(function (item) { return item.target === headword; });
+      state.dSession.rangeText = '单词重练';
+      location.hash = '#/dictation';
       return;
     }
 

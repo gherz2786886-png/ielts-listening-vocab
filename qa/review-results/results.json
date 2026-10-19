@@ -1,0 +1,50 @@
+[
+  {
+    "name": "learning data, pagination, source notes and unchanged word count",
+    "passed": true
+  },
+  {
+    "name": "early exit with zero answers has no artificial zero-percent grade",
+    "passed": true
+  },
+  {
+    "name": "early exit scores submitted answers only and retains planned range",
+    "passed": true
+  },
+  {
+    "name": "wrong answer stores reason tags, reload retains history, single review works",
+    "passed": true
+  },
+  {
+    "name": "manual reason tags survive dictation and mastered/unmastered transitions",
+    "passed": true
+  },
+  {
+    "name": "old wrong, mastered and learned storage is preserved",
+    "passed": true
+  },
+  {
+    "name": "IME composition does not replace the focused search element",
+    "passed": true
+  },
+  {
+    "name": "blocked storage reports unsaved records without breaking UI",
+    "passed": true
+  },
+  {
+    "name": "navigation cancels pending autoplay and accent switch schedules once",
+    "passed": true
+  },
+  {
+    "name": "unreadable existing data is reported and never overwritten",
+    "passed": true
+  },
+  {
+    "name": "mobile 375 learning, wrong book and quiz do not overflow",
+    "passed": true
+  },
+  {
+    "name": "mobile 390 learning, wrong book and quiz do not overflow",
+    "passed": true
+  }
+]

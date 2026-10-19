@@ -25,8 +25,8 @@
   - 每条错词带错因标签（意思 / 拼写 / 听错），可直接点标签即时增删，支持按错因 × 场景双重筛选；
   - 按场景、错误次数筛选；单条重练、整组重练；"已掌握"后可移除；localStorage 持久化。
 - **发音与断网兜底**
-  - 默认走有道 dictvoice 真人发音（`type=2` 英音 / `type=1` 美音）；
-  - 请求失败、超时或断网时，自动回退浏览器内置 Web Speech API（`en-GB` / `en-US`），离线也能听。
+  - 默认走有道 dictvoice 真人发音（`type=1` 英音 / `type=2` 美音）；
+  - 请求失败、超时或断网时，自动回退浏览器内置 Web Speech API（`en-GB` / `en-US`），设备已安装可用英语语音时支持离线发音；口音取决于可用语音。
 - **零依赖**：纯 HTML / CSS / 原生 JS，无框架、无构建步骤。
 
 ## 使用方法
@@ -99,8 +99,27 @@ ielts-listening-vocab/
 
 ## 关于音标
 
-词卡上的英式 / 美式印刷音标**照录自原 PDF**，未做修正。源文件中个别位置存在音标与单词错位等印刷错误（如 p3 review 行误印 hotel 音标、p3 honey 行误印 animal 音标等），均按原样保留；发音以在线真人发音接口为准，印刷音标仅供对照参考。完整的源文件已知问题清单见 [`qa/extraction_report.md`](qa/extraction_report.md)。
+词卡上的英式 / 美式印刷音标**照录自原 PDF**，未做修正。源文件中个别位置存在音标与单词错位等印刷错误（如 p3 review 行误印 hotel 音标、p3 honey 行误印 animal 音标等），均按原样保留，并在已知问题词卡上显示来源提示；印刷音标仅供对照参考。完整的源文件已知问题清单见 [`qa/extraction_report.md`](qa/extraction_report.md)。
 
 ## 许可与致谢
 
 词库内容源自新东方南昌分中心国际教育雅思教研听口组《听力场景词汇（new）》教研资料，本项目仅作个人学习用途的电子化整理与交互呈现。
+
+## 2026-10-19 可靠性修复
+
+听写批改已修复特殊空格和长横线导致的卡死，以及任意词尾被误认成英美拼写的情况。提前结束时，正确率只按已提交题数计算，并单列未作答题数。错词本每条记录均可点「单词重练」。
+
+发音口音现与有道官网一致：英音 `type=1`，美音 `type=2`。切换或停止播放会取消旧音频和待启动的浏览器语音；页面显示回退与失败提示。学习记录保存失败会提示；无法读取的旧记录不会被空数据覆盖。中文搜索兼容输入法组合输入，手机导航保持横排。
+
+验证与问题证据见 [DEBUG_REPORT.md](DEBUG_REPORT.md)，版本记录见 [CHANGELOG.md](CHANGELOG.md)。原词库、词条 ID、「意思 / 拼写 / 听错」标签和存储键均保留。学习记录仍只属于当前浏览器，尚无跨设备或欧路同步。
+
+可复现检查（Node.js；浏览器测试另需可用的 Playwright 和 Microsoft Edge）：
+
+```sh
+node qa/qa_dictation_cases.js
+node qa/review_dictation_regressions.js
+node qa/review_audio_regressions.js
+node qa/review_browser_regressions.js
+```
+
+若 Playwright 不在默认模块路径，可将其包目录作为最后一条命令的参数。浏览器测试使用临时隔离上下文，不连接正在使用的浏览器账号。

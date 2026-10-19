@@ -31,42 +31,48 @@
   }
 
   /* ============ 英美变体规则表（可读数组，便于扩充） ============
-   * 每条：{a: 词尾形态A, b: 词尾形态B, ruleCn: 中文说明}
-   * 命中方向自动双向检测（输入=英式/答案=美式，或反之）。
+   * 每条列出明确词对；a/b 只用于说明，不能凭相同词尾推测一个拼写合法。
+   * 例如 flower/flowre、fence/fense 都不是英美变体。
+   * 命中方向自动双向检测，短语中的每个不同单词都必须命中词对。
    */
   var UK_US_RULES = [
-    { a: 'our',   b: 'or',   ruleCn: '英式 -our 对应美式 -or（如 colour/color、neighbour/neighbor）' },
-    { a: 're',    b: 'er',   ruleCn: '英式 -re 对应美式 -er（如 centre/center、theatre/theater）' },
-    { a: 'ise',   b: 'ize',  ruleCn: '英式 -ise 对应美式 -ize（如 organise/organize、realise/realize）' },
-    { a: 'lled',  b: 'led',  ruleCn: '英式双写 l 过去式对应美式单写 l（如 cancelled/canceled）' },
-    { a: 'lling', b: 'ling', ruleCn: '英式双写 l 现在分词对应美式单写 l（如 travelling/traveling）' },
-    { a: 'ller',  b: 'ler',  ruleCn: '英式双写 l 施动者对应美式单写 l（如 traveller/traveler）' },
-    { a: 'nce',   b: 'nse',  ruleCn: '英式名词 -nce 对应美式 -nse（如 licence/license、defence/defense）' },
-    { a: 'que',   b: 'ck',   ruleCn: '英式 -que 对应美式 -ck（如 cheque/check）' },
-    { a: 'mme',   b: 'm',    ruleCn: '英式 -mme 对应美式 -m（如 programme/program）' },
-    { a: 'ogue',  b: 'og',   ruleCn: '英式 -ogue 对应美式 -og（如 catalogue/catalog）' },
-    { a: 'grey',  b: 'gray',  ruleCn: '英式 grey 对应美式 gray' }
+    { a: 'our', b: 'or', pairs: 'colour/color colours/colors coloured/colored colourful/colorful behaviour/behavior behaviours/behaviors behavioural/behavioral neighbour/neighbor neighbours/neighbors neighbourhood/neighborhood flavour/flavor flavours/flavors flavoured/flavored favour/favor favours/favors favourite/favorite favourites/favorites harbour/harbor harbours/harbors labour/labor labours/labors honour/honor honours/honors humour/humor odour/odor odours/odors rumour/rumor rumours/rumors', ruleCn: '英式 -our 对应美式 -or（如 colour/color、neighbour/neighbor）' },
+    { a: 're', b: 'er', pairs: 'centre/center centres/centers centred/centered theatre/theater theatres/theaters litre/liter litres/liters metre/meter metres/meters kilometre/kilometer kilometres/kilometers centimetre/centimeter centimetres/centimeters millimetre/millimeter millimetres/millimeters fibre/fiber fibres/fibers', ruleCn: '英式 -re 对应美式 -er（如 centre/center、theatre/theater）' },
+    { a: 'ise', b: 'ize', pairs: 'organise/organize organises/organizes organised/organized organising/organizing organisation/organization organisations/organizations realise/realize realises/realizes realised/realized realising/realizing recognise/recognize recognises/recognizes recognised/recognized recognising/recognizing socialise/socialize socialises/socializes socialised/socialized socialising/socializing summarise/summarize summarises/summarizes summarised/summarized summarising/summarizing apologise/apologize apologise/apologize specialise/specialize specialised/specialized specialising/specializing', ruleCn: '英式 -ise 对应美式 -ize（如 organise/organize、realise/realize）' },
+    { a: 'lled', b: 'led', pairs: 'cancelled/canceled travelled/traveled labelled/labeled modelled/modeled levelled/leveled', ruleCn: '英式双写 l 过去式对应美式单写 l（如 cancelled/canceled）' },
+    { a: 'lling', b: 'ling', pairs: 'travelling/traveling cancelling/canceling labelling/labeling modelling/modeling levelling/leveling', ruleCn: '英式双写 l 现在分词对应美式单写 l（如 travelling/traveling）' },
+    { a: 'ller', b: 'ler', pairs: 'traveller/traveler travellers/travelers', ruleCn: '英式双写 l 施动者对应美式单写 l（如 traveller/traveler）' },
+    { a: 'nce', b: 'nse', pairs: 'licence/license licences/licenses defence/defense defences/defenses offence/offense offences/offenses pretence/pretense', ruleCn: '英式名词 -nce 对应美式 -nse（如 licence/license、defence/defense）' },
+    { a: 'que', b: 'ck', pairs: 'cheque/check cheques/checks', ruleCn: '英式 -que 对应美式 -ck（如 cheque/check）' },
+    { a: 'mme', b: 'm', pairs: 'programme/program programmes/programs', ruleCn: '英式 -mme 对应美式 -m（如 programme/program）' },
+    { a: 'ogue', b: 'og', pairs: 'catalogue/catalog catalogues/catalogs dialogue/dialog dialogues/dialogs analogue/analog analogues/analogs', ruleCn: '英式 -ogue 对应美式 -og（如 catalogue/catalog）' },
+    { a: 'grey', b: 'gray', pairs: 'grey/gray', ruleCn: '英式 grey 对应美式 gray' },
+    { a: 'tyre', b: 'tire', pairs: 'tyre/tire tyres/tires', ruleCn: '英式 tyre 对应美式 tire' },
+    { a: 'yse', b: 'yze', pairs: 'analyse/analyze analyses/analyzes analysed/analyzed analysing/analyzing', ruleCn: '英式 analyse 对应美式 analyze' }
   ];
+
+  var UK_US_PAIRS = {};
+  UK_US_RULES.forEach(function (rule) {
+    rule.pairs.split(' ').forEach(function (pair) {
+      var words = pair.split('/');
+      UK_US_PAIRS[words[0] + '/' + words[1]] = rule.ruleCn;
+      UK_US_PAIRS[words[1] + '/' + words[0]] = rule.ruleCn;
+    });
+  });
 
   // 公共接口：判断 a、b（任意字符串，内部会归一化）是否英美变体
   function isUkUsVariant(rawA, rawB) {
-    var a = normalize(rawA);
-    var b = normalize(rawB);
-    if (a === b) return { match: false, ruleCn: '' };
-    for (var i = 0; i < UK_US_RULES.length; i++) {
-      var r = UK_US_RULES[i];
-      if (a.length > r.a.length && b.length > r.b.length) {
-        if (a.slice(-r.a.length) === r.a && b.slice(-r.b.length) === r.b &&
-            a.slice(0, a.length - r.a.length) === b.slice(0, b.length - r.b.length)) {
-          return { match: true, ruleCn: r.ruleCn };
-        }
-        if (a.slice(-r.b.length) === r.b && b.slice(-r.a.length) === r.a &&
-            a.slice(0, a.length - r.b.length) === b.slice(0, b.length - r.a.length)) {
-          return { match: true, ruleCn: r.ruleCn };
-        }
-      }
+    var a = normalize(rawA).split(' ');
+    var b = normalize(rawB).split(' ');
+    var reasons = [];
+    if (a.length !== b.length) return { match: false, ruleCn: '' };
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] === b[i]) continue;
+      var reason = UK_US_PAIRS[a[i] + '/' + b[i]];
+      if (!reason) return { match: false, ruleCn: '' };
+      if (reasons.indexOf(reason) < 0) reasons.push(reason);
     }
-    return { match: false, ruleCn: '' };
+    return { match: reasons.length > 0, ruleCn: reasons.join('；') };
   }
 
   /* ============ 后缀混淆表（判错，不算英美变体） ============ */
@@ -139,28 +145,36 @@
   /* ============ 格式路径（仅大小写/空格/连字符差异） ============
    * TI/TA：已 trim 的原始输入/答案；两侧 loose-norm 后完全一致。
    */
+  // 与 loose() 使用相同字符集合，避免 Unicode 空格/横线被归一化后无法对齐。
+  var FORMAT_SEPARATORS = /[\s\u2013\u2014-]+/g;
+  function isFormatSeparator(c) { return /[\s\u2013\u2014-]/.test(c); }
+
   function formatPairs(TI, TA) {
     var pairs = [];
     var i = 0, j = 0;
-    function isWs(c) { return c === ' ' || c === '-' || c === '\t'; }
     while (i < TI.length || j < TA.length) {
       var iw = '', jw = '';
-      while (i < TI.length && isWs(TI[i])) { iw += TI[i]; i++; }
-      while (j < TA.length && isWs(TA[j])) { jw += TA[j]; j++; }
+      while (i < TI.length && isFormatSeparator(TI[i])) { iw += TI[i]; i++; }
+      while (j < TA.length && isFormatSeparator(TA[j])) { jw += TA[j]; j++; }
       if (iw.length || jw.length) {
         if (iw !== jw) {
-          if (iw.indexOf('-') >= 0 || jw.indexOf('-') >= 0) {
-            pairs.push({ a: jw.charAt(0) || '-', g: iw.charAt(0) || ' ', op: 'punct' });
+          if (/[-\u2013\u2014]/.test(iw + jw)) {
+            pairs.push({ a: jw, g: iw, op: 'punct' });
           } else {
             pairs.push({ a: jw, g: iw, op: 'space' });
           }
+        } else {
+          pairs.push({ a: jw, g: iw, op: 'equal' });
         }
       }
-      var k = 0;
-      while (i < TI.length && !isWs(TI[i]) && j < TA.length && !isWs(TA[j])) {
+      if (i < TI.length && j < TA.length) {
         if (TI[i] === TA[j]) pairs.push({ a: TA[j], g: TI[i], op: 'equal' });
         else pairs.push({ a: TA[j], g: TI[i], op: 'case' });
-        i++; j++; k++;
+        i++; j++;
+      } else if (i < TI.length) {
+        pairs.push({ a: '', g: TI[i++], op: 'ins' });
+      } else if (j < TA.length) {
+        pairs.push({ a: TA[j++], g: '', op: 'del' });
       }
     }
     return pairs;
@@ -316,7 +330,7 @@
 
     // ---- 1) loose-norm：小写 + 连字符→空格 + 空白折叠后一致 → 格式差异，判对 ----
     function loose(s) {
-      return s.toLowerCase().replace(/[-–—]/g, ' ').replace(/\s+/g, ' ').trim();
+      return s.toLowerCase().replace(FORMAT_SEPARATORS, ' ').trim();
     }
     var lIn = loose(TI), lAns = loose(TA);
 
