@@ -243,3 +243,41 @@ shot.py 产出（`qa/qa_shots/`）：
 
 10 条修复词条逐条与 PDF 原文一致，同类叠字无残留，结构/加载/集成回归全绿。
 **结论由「修复后放行」更新为：已复核放行。** （原「不通过项清单」第 1 项关闭。）
+
+---
+
+# 迭代验收（错因标记，2026-10-19）
+
+需求：学习页「已学」勾选 → 「已错」错因标记（意思/拼写/听错三 chip 多选，popover 确认/取消/移除），进度改「已错 x/y」，错词本带错因标签+顶部错因筛选+条目可改标签，听写默认收录「拼写」，旧 localStorage 平滑兼容。
+本次验收脚本：`qa/qa_iter_a1a4.py`、`qa/qa_iter_a5a8.py`、`qa/qa_iter_a9a10.py`（均 playwright 实测，断言输出为 PASS/FAIL 逐行记录）。
+
+## A. 新功能实测
+
+| 项 | 结果 | 关键证据 |
+|----|------|----------|
+| A1 卡片无已学 checkbox、均为已错按钮 | 通过 | 39 卡 39 个 `.wrong-toggle`、0 个 `.learn-toggle`、body 无「已学」文案；popover 含 意思/拼写/听错 三 chip；0 选中时确认 disabled；未标记无「移除标记」 |
+| A2 选 拼写+听错 确认 | 通过 | 按钮文案=「已错 · 拼写 / 听错」、卡片 marked 态、badge=1、localStorage tags=['spelling','listening']、刷新后仍在；错词本见该条且带两标签 |
+| A3 重开面板预选+移除 | 通过 | 重开 chips 预选[拼写,听错]、出现「移除标记」；移除后按钮回「已错」、badge 隐藏、进度 x=0、错词本空 |
+| A4 进度文案 | 通过 | 「租房场景 已错 x / 161」「全局 x / 1078」；标记两词 0→2；grep 全项目无「已学」UI 残留（仅 storage 层 `store.learned` 无控件） |
+| A5 错词本筛选计数 | 通过 | 预置 4 条（meaning/spelling/meaning+spelling/dictation spelling×2）：全部 4 / 意思 2 / 拼写 3 / 听错 0；点「意思」列表过滤正确；与场景下拉叠加仅 cab；错词本组卷重练=「第 1 / 4 题」不受筛选影响 |
+| A6 条目直接改标签 | 通过 | cab 点 spelling → [意思,拼写]，刷新持久；restaurant 取消唯一 spelling → 被拒仍保留[拼写]（denied 抖动） |
+| A7 手动 vs 听写文案 | 通过 | count=0 显示「手动标记」；听写条目显示「错 2 次」+「最近原因：把 a 写成了 e」 |
+| A8 听写链路+标签并集 | 通过 | 手动标 adults=意思后，听写 p2 首题拼错 adult → 结果「漏写了字母 s」；wrong 中 adults reasonTags=[meaning,spelling]、count=1、保留 lastReason |
+| A9 旧数据兼容 | 通过 | 预置旧 wrong（无 reasonTags,count=2）+ mastered{parking lot} + learned{p02-001:1} → 旧 wrong 自动显示「拼写」标签、mastered 不丢、learned key 仍在；全程无 console error |
+| A10 已掌握/移回流程 | 通过 | restaurant 标记已掌握→活跃空、已掌握区含 parking lot+restaurant 且标签只读（无 data-entry-tag）；移回→活跃=[restaurant] |
+
+## B. 回归
+
+| 项 | 结果 |
+|----|------|
+| `python qa/integration_check.py` | **21/21 通过** |
+| node 跑 `qa/qa_dictation_cases.js`（41 案例） | **41/41 通过**（trans/ukus/短语宽容未受影响） |
+| `node --check js/app.js` | 通过（exit 0） |
+| shot.py（桌面+移动） | status=pass，blocker=0 error=0 warning=0，findings 0，无 horizontalOverflow/consoleErrors |
+| 视觉抽查 | popover（`qa/iter_shots/a1_popover.png`）三 chip+确认 disabled+进度文案正确；错词本筛选（`a5_filter.png`）计数 chip+叠加过滤+手动标记 badge；移动端（`shot_default/index_mobile_p1of2.jpg`）无横向溢出、全中文、文字按钮无 emoji |
+
+## C. 结论
+
+**本次迭代 10 项新功能 + 4 项回归全部通过，0 不通过项。**
+「已学→已错」切换、popover 多选/确认 disabled/预选/移除、进度「已错 x/y」、错词本错因筛选（计数/叠加/重练范围不受影响）、条目标签即时切换持久化+拒绝取消最后一个、手动标记 vs 听写收录文案、听写标签并集与 count 累加、旧 localStorage 三键平滑兼容、已掌握区标签只读——均独立 playwright 实测通过。
+**迭代验收通过，可放行。**

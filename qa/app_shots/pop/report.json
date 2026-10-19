@@ -1,0 +1,153 @@
+{
+  "src": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\index.html",
+  "url": "file:///C:/Users/33362/Doubao/chats/2026-10-15/new-chat/ielts-listening-vocab/index.html",
+  "outdir": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\pop",
+  "include": [
+    "lint",
+    "screenshots",
+    "structure"
+  ],
+  "shots": {
+    "desktop": {
+      "revealed": 0,
+      "eval": {
+        "executed": true,
+        "result": {
+          "pop": true,
+          "label": "已错 · 拼写 / 听错",
+          "badge": "1"
+        }
+      },
+      "slices": [
+        "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\pop\\index_desktop_p1of2.jpg",
+        "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\pop\\index_desktop_p2of2.jpg"
+      ],
+      "sliceHint": "按顺序 Read slices 里的各分片。",
+      "truncated": false,
+      "structure": {
+        "title": "雅思听力场景词汇",
+        "firstH1": "",
+        "viewport": {
+          "w": 1440,
+          "h": 900
+        },
+        "fullpage": {
+          "w": 1440,
+          "h": 5977
+        },
+        "counts": {
+          "section": 0,
+          "h1": 0,
+          "h2": 0,
+          "img": 0,
+          "canvas": 0,
+          "svg": 0,
+          "links": 4,
+          "buttons": 143
+        }
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "horizontalOverflow": [],
+      "resourceErrors": []
+    },
+    "mobile": {
+      "revealed": 0,
+      "eval": {
+        "executed": true,
+        "result": {
+          "pop": false,
+          "label": "已错 · 拼写 / 听错",
+          "badge": "1"
+        }
+      },
+      "slices": [
+        "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\pop\\index_mobile_p1of2.jpg",
+        "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\pop\\index_mobile_p2of2.jpg"
+      ],
+      "sliceHint": "按顺序 Read slices 里的各分片。",
+      "truncated": false,
+      "structure": {
+        "title": "雅思听力场景词汇",
+        "firstH1": "",
+        "viewport": {
+          "w": 390,
+          "h": 844
+        },
+        "fullpage": {
+          "w": 390,
+          "h": 6109
+        },
+        "counts": {
+          "section": 0,
+          "h1": 0,
+          "h2": 0,
+          "img": 0,
+          "canvas": 0,
+          "svg": 0,
+          "links": 4,
+          "buttons": 137
+        }
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "horizontalOverflow": [],
+      "resourceErrors": []
+    }
+  },
+  "engine": "playwright",
+  "chromiumExec": "(playwright default)",
+  "elapsedSec": 9.03,
+  "schemaVersion": 2,
+  "status": "pass",
+  "engineInfo": {
+    "name": "playwright",
+    "degraded": false,
+    "degradedReasons": []
+  },
+  "input": {
+    "original": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\index.html",
+    "resolvedPath": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\index.html",
+    "baseUrl": "file:///C:/Users/33362/Doubao/chats/2026-10-15/new-chat/ielts-listening-vocab/index.html",
+    "protocol": "file",
+    "cwd": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat",
+    "mediaMode": {
+      "reducedMotion": true
+    }
+  },
+  "artifacts": {
+    "screenshots": [
+      {
+        "viewport": "desktop",
+        "tiles": [
+          "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\pop\\index_desktop_p1of2.jpg",
+          "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\pop\\index_desktop_p2of2.jpg"
+        ],
+        "visualCoverage": {
+          "complete": true,
+          "reason": null
+        }
+      },
+      {
+        "viewport": "mobile",
+        "tiles": [
+          "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\pop\\index_mobile_p1of2.jpg",
+          "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\pop\\index_mobile_p2of2.jpg"
+        ],
+        "visualCoverage": {
+          "complete": true,
+          "reason": null
+        }
+      }
+    ]
+  },
+  "summary": {
+    "blocker": 0,
+    "error": 0,
+    "warning": 0,
+    "info": 0
+  },
+  "findings": [],
+  "prioritizedActions": [],
+  "reportPath": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\pop\\report.json"
+}

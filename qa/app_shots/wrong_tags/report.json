@@ -1,0 +1,135 @@
+{
+  "src": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\index.html",
+  "url": "file:///C:/Users/33362/Doubao/chats/2026-10-15/new-chat/ielts-listening-vocab/index.html",
+  "outdir": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\wrong_tags",
+  "include": [
+    "lint",
+    "screenshots",
+    "structure"
+  ],
+  "shots": {
+    "desktop": {
+      "revealed": 0,
+      "eval": {
+        "executed": true,
+        "result": null
+      },
+      "screenshot": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\wrong_tags\\index_desktop.jpg",
+      "screenshotBytes": 29009,
+      "truncated": false,
+      "structure": {
+        "title": "雅思听力场景词汇",
+        "firstH1": "",
+        "viewport": {
+          "w": 1440,
+          "h": 900
+        },
+        "fullpage": {
+          "w": 1440,
+          "h": 920
+        },
+        "counts": {
+          "section": 0,
+          "h1": 0,
+          "h2": 1,
+          "img": 0,
+          "canvas": 0,
+          "svg": 0,
+          "links": 4,
+          "buttons": 24
+        }
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "horizontalOverflow": [],
+      "resourceErrors": []
+    },
+    "mobile": {
+      "revealed": 0,
+      "eval": {
+        "executed": true,
+        "result": null
+      },
+      "screenshot": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\wrong_tags\\index_mobile.jpg",
+      "screenshotBytes": 39768,
+      "truncated": false,
+      "structure": {
+        "title": "雅思听力场景词汇",
+        "firstH1": "",
+        "viewport": {
+          "w": 390,
+          "h": 844
+        },
+        "fullpage": {
+          "w": 390,
+          "h": 900
+        },
+        "counts": {
+          "section": 0,
+          "h1": 0,
+          "h2": 1,
+          "img": 0,
+          "canvas": 0,
+          "svg": 0,
+          "links": 4,
+          "buttons": 24
+        }
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "horizontalOverflow": [],
+      "resourceErrors": []
+    }
+  },
+  "engine": "playwright",
+  "chromiumExec": "(playwright default)",
+  "elapsedSec": 4.4,
+  "schemaVersion": 2,
+  "status": "pass",
+  "engineInfo": {
+    "name": "playwright",
+    "degraded": false,
+    "degradedReasons": []
+  },
+  "input": {
+    "original": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\index.html",
+    "resolvedPath": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\index.html",
+    "baseUrl": "file:///C:/Users/33362/Doubao/chats/2026-10-15/new-chat/ielts-listening-vocab/index.html",
+    "protocol": "file",
+    "cwd": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat",
+    "mediaMode": {
+      "reducedMotion": true
+    }
+  },
+  "artifacts": {
+    "screenshots": [
+      {
+        "viewport": "desktop",
+        "path": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\wrong_tags\\index_desktop.jpg",
+        "size": 29009,
+        "visualCoverage": {
+          "complete": true,
+          "reason": null
+        }
+      },
+      {
+        "viewport": "mobile",
+        "path": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\wrong_tags\\index_mobile.jpg",
+        "size": 39768,
+        "visualCoverage": {
+          "complete": true,
+          "reason": null
+        }
+      }
+    ]
+  },
+  "summary": {
+    "blocker": 0,
+    "error": 0,
+    "warning": 0,
+    "info": 0
+  },
+  "findings": [],
+  "prioritizedActions": [],
+  "reportPath": "C:\\Users\\33362\\Doubao\\chats\\2026-10-15\\new-chat\\ielts-listening-vocab\\qa\\app_shots\\wrong_tags\\report.json"
+}

@@ -72,6 +72,34 @@
   function persistMastered() { saveJSON(LS.MASTERED, store.mastered); }
   function persistSettings() { saveJSON(LS.SETTINGS, store.settings); }
 
+  /* ---------------- 错因标签（固定顺序：意思 → 拼写 → 听错） ---------------- */
+
+  var REASON_ORDER = ['meaning', 'spelling', 'listening'];
+  var REASON_LABELS = { meaning: '意思', spelling: '拼写', listening: '听错' };
+
+  // 旧数据幂等迁移：历史错词条无 reasonTags 时默认归为「拼写」
+  // （仅内存中迁移，首次变更时随 persist 写回；绝不清空已有 wrong/mastered 记录）
+  Object.keys(store.wrong).forEach(function (k) {
+    var e = store.wrong[k];
+    if (e && (!e.reasonTags || !e.reasonTags.length)) e.reasonTags = ['spelling'];
+  });
+
+  // 按固定顺序整理标签数组
+  function orderedTags(tags) {
+    var set = {};
+    (tags || []).forEach(function (t) { set[t] = true; });
+    return REASON_ORDER.filter(function (t) { return set[t]; });
+  }
+
+  function reasonTagsOf(e) {
+    var t = orderedTags(e && e.reasonTags);
+    return t.length ? t : ['spelling'];
+  }
+
+  function tagLabel(tags) {
+    return tags.map(function (t) { return REASON_LABELS[t] || t; }).join(' / ');
+  }
+
   /* ---------------- 全局状态 ---------------- */
 
   var state = {
@@ -85,7 +113,11 @@
       order: store.settings.order || 'sequence',
       accent: store.settings.accent || 'uk'
     },
-    dSession: null // {queue, index, correct, exact, wrongNew, answered}
+    dSession: null, // {queue, index, correct, exact, wrongNew, answered}
+    wPop: null,     // 学习页错因面板：{wordId, draft:[]}，同时只开一个
+    wrongReasonFilter: 'all', // 错词本错因筛选：all|meaning|spelling|listening
+    wrongFilter: 'all',       // 错词本场景筛选
+    showMastered: false       // 错词本是否展开已掌握区
   };
 
   function persistViewSettings() {
@@ -165,11 +197,76 @@
     prev.scenario = word.scenario || prev.scenario || '';
     prev.lastReason = reasonCn || '';
     prev.updatedAt = Date.now();
+    // 听写自动收录：与 ['spelling'] 取并集，手动标记的其他标签不被覆盖
+    prev.reasonTags = orderedTags((prev.reasonTags || []).concat(['spelling']));
     store.wrong[key] = prev;
     if (store.mastered[key]) delete store.mastered[key];
     persistWrong();
     persistMastered();
     updateBadge();
+  }
+
+  /** 学习页手动标记：key 取第一个 headword；已存在则补 manual=true，标签整体替换 */
+  function manualMarkWrong(word, tags) {
+    var key = (word.headwords && word.headwords[0]) || word.display;
+    var e = store.wrong[key] || { headword: key, count: 0 };
+    e.count = e.count || 0;
+    e.manual = true;
+    e.wordId = word.id || e.wordId || null;
+    e.display = word.display || e.display || key;
+    e.meaning = word.meaning || e.meaning || '';
+    e.page = word.page || e.page || null;
+    e.scenarioId = word.scenarioId || e.scenarioId || '';
+    e.scenario = word.scenario || e.scenario || '';
+    e.reasonTags = orderedTags(tags);
+    e.updatedAt = Date.now();
+    store.wrong[key] = e;
+    if (store.mastered[key]) delete store.mastered[key];
+    persistWrong();
+    persistMastered();
+    updateBadge();
+  }
+
+  /** 删除某词关联的活跃错词条目（按 wordId 匹配，否则按 headword 是否在 headwords 中） */
+  function removeWrongForWord(word) {
+    Object.keys(store.wrong).forEach(function (k) {
+      var e = store.wrong[k];
+      var match = (e.wordId && word.id && e.wordId === word.id) ||
+        ((word.headwords || []).indexOf(e.headword) >= 0);
+      if (match) {
+        delete store.wrong[k];
+        delete store.mastered[k];
+      }
+    });
+    persistWrong();
+    persistMastered();
+    updateBadge();
+  }
+
+  /** 错词本内直接修改标签（tags 至少 1 个，由 UI 保证） */
+  function setEntryTags(key, tags) {
+    var e = store.wrong[key];
+    if (!e) return;
+    e.reasonTags = orderedTags(tags);
+    e.updatedAt = Date.now();
+    persistWrong();
+    updateBadge();
+  }
+
+  /** 查某词的活跃（未掌握）错词条目，无则 null */
+  function findWrongEntryForWord(word) {
+    for (var k in store.wrong) {
+      if (store.mastered[k]) continue;
+      var e = store.wrong[k];
+      if (!e) continue;
+      if (e.wordId && word.id && e.wordId === word.id) return e;
+      if ((word.headwords || []).indexOf(e.headword) >= 0) return e;
+    }
+    return null;
+  }
+
+  function isWordWrong(word) {
+    return !!findWrongEntryForWord(word);
   }
 
   function activeWrongEntries() {
@@ -193,7 +290,6 @@
   /* ---------------- 渲染：学习模式 ---------------- */
 
   function renderWordCard(w) {
-    var learned = !!store.learned[w.id];
     var ipa = [];
     if (w.ipaUk) ipa.push('英 ' + w.ipaUk);
     if (w.ipaUs) ipa.push('美 ' + w.ipaUs);
@@ -205,22 +301,49 @@
         '<button class="speak-btn" type="button" data-speak="' + esc(hw) +
         '" data-accent="us" aria-pressed="false">美</button>';
     });
+
+    // ---- 已错标记 + popover 面板 ----
+    var entry = findWrongEntryForWord(w);
+    var isMarked = !!entry;
+    var tags = isMarked ? reasonTagsOf(entry) : [];
+    var toggleLabel = isMarked ? '已错 · ' + tagLabel(tags) : '已错';
+
+    var popHtml = '';
+    if (state.wPop && state.wPop.wordId === w.id) {
+      var draft = state.wPop.draft;
+      var tagBtns = REASON_ORDER.map(function (t) {
+        return '<button type="button" class="chip-tag t-' + t +
+          (draft.indexOf(t) >= 0 ? ' on' : '') +
+          '" data-wtag="' + t + '">' + REASON_LABELS[t] + '</button>';
+      }).join('');
+      popHtml =
+        '<div class="pop" role="dialog">' +
+          '<p class="field-label">错因（可多选）</p>' +
+          '<div class="pop-tags">' + tagBtns + '</div>' +
+          '<div class="pop-actions">' +
+            '<button type="button" class="btn btn-ghost btn-sm" data-wcancel>取消</button>' +
+            (isMarked ? '<button type="button" class="btn btn-danger btn-sm" data-wremove>移除标记</button>' : '') +
+            '<button type="button" class="btn btn-primary btn-sm" data-wconfirm' +
+              (draft.length ? '' : ' disabled') + '>确认</button>' +
+          '</div>' +
+        '</div>';
+    }
+
     return '' +
-      '<div class="word-card">' +
+      '<div class="word-card' + (isMarked ? ' marked' : '') + '">' +
         '<div class="word-head">' +
           '<div style="flex:1;min-width:0">' +
             '<div class="word-display">' + esc(w.display) + '</div>' +
             '<div class="word-meaning">' + esc(w.meaning) + '</div>' +
           '</div>' +
-          '<label class="learn-toggle' + (learned ? ' checked' : '') + '">' +
-            '<input type="checkbox" data-learn="' + esc(w.id) + '"' + (learned ? ' checked' : '') + '>' +
-            '已学' +
-          '</label>' +
+          '<button type="button" class="wrong-toggle' + (isMarked ? ' marked' : '') +
+            '" data-wmark="' + esc(w.id) + '">' + esc(toggleLabel) + '</button>' +
         '</div>' +
         '<div class="hw-line">' +
           hwBtns +
           (ipa.length ? '<span class="ipa">' + esc(ipa.join(' · ')) + '</span>' : '') +
         '</div>' +
+        popHtml +
       '</div>';
   }
 
@@ -293,15 +416,15 @@
         '<span class="pagenum">p' + state.page + '</span>' +
       '</div>';
 
-    // ---- 进度 ----
+    // ---- 进度（已错）----
     var scWords = wordsByScenario(sc.id);
-    var learnedCnt = scWords.filter(function (w) { return store.learned[w.id]; }).length;
-    var totalLearned = VOCAB.words.filter(function (w) { return store.learned[w.id]; }).length;
-    var pct = scWords.length ? Math.round(learnedCnt / scWords.length * 100) : 0;
+    var wrongCnt = scWords.filter(isWordWrong).length;
+    var totalWrong = VOCAB.words.filter(isWordWrong).length;
+    var pct = scWords.length ? Math.round(wrongCnt / scWords.length * 100) : 0;
     html +=
       '<div class="progress-wrap">' +
-        '<div class="progress-meta"><span>' + esc(sc.name) + ' 已学 ' + learnedCnt + ' / ' + scWords.length +
-          '</span><span>全局 ' + totalLearned + ' / ' + VOCAB.words.length + '</span></div>' +
+        '<div class="progress-meta"><span>' + esc(sc.name) + ' 已错 ' + wrongCnt + ' / ' + scWords.length +
+          '</span><span>全局 ' + totalWrong + ' / ' + VOCAB.words.length + '</span></div>' +
         '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
       '</div>';
 
@@ -599,7 +722,19 @@
   /* ---------------- 渲染：错词本 ---------------- */
 
   state.wrongFilter = 'all';
-  state.showMastered = false;
+
+  // 渲染一组错因 chip（active=true 时可点切换）
+  function reasonChipHtml(e, clickable) {
+    var cur = reasonTagsOf(e);
+    return REASON_ORDER.map(function (t) {
+      var on = cur.indexOf(t) >= 0;
+      if (clickable) {
+        return '<button type="button" class="chip-tag t-' + t + (on ? ' on' : '') +
+          '" data-entry-tag="' + esc(e.headword) + '" data-tag="' + t + '">' + REASON_LABELS[t] + '</button>';
+      }
+      return '<span class="chip-tag t-' + t + (on ? ' on readonly' : '') + '">' + REASON_LABELS[t] + '</span>';
+    }).join('');
+  }
 
   function renderWrong() {
     var entries = activeWrongEntries();
@@ -611,36 +746,58 @@
         esc(sc.name) + '</option>';
     });
 
+    // 错因筛选计数（基于活跃条目，不受场景筛选影响）
+    var tagCounts = { meaning: 0, spelling: 0, listening: 0 };
+    entries.forEach(function (e) {
+      reasonTagsOf(e).forEach(function (t) {
+        if (tagCounts[t] !== undefined) tagCounts[t]++;
+      });
+    });
+    var reasonFilters = [['all', '全部', entries.length]]
+      .concat([['meaning', '意思', tagCounts.meaning], ['spelling', '拼写', tagCounts.spelling], ['listening', '听错', tagCounts.listening]])
+      .map(function (o) {
+        return '<button type="button" class="chip tag-filter' + (state.wrongReasonFilter === o[0] ? ' on' : '') +
+          '" data-reason-filter="' + o[0] + '">' + o[1] + ' ' + o[2] + '</button>';
+      }).join('');
+
+    // 场景筛选 × 错因筛选叠加
     var list = entries.filter(function (e) {
-      return state.wrongFilter === 'all' || e.scenarioId === state.wrongFilter;
+      var okSc = state.wrongFilter === 'all' || e.scenarioId === state.wrongFilter;
+      var okReason = state.wrongReasonFilter === 'all' ||
+        reasonTagsOf(e).indexOf(state.wrongReasonFilter) >= 0;
+      return okSc && okReason;
     });
 
     var html =
       '<div class="wrong-head">' +
         '<h2 style="margin:0;flex:1;min-width:0">错词本</h2>' +
-        '<button class="btn btn-primary btn-sm" type="button" data-wrong-quiz' + (list.length ? '' : ' disabled') + '>错词本组卷重练</button>' +
+        '<button class="btn btn-primary btn-sm" type="button" data-wrong-quiz' + (entries.length ? '' : ' disabled') + '>错词本组卷重练</button>' +
       '</div>' +
       '<div class="wrong-head">' +
         '<select class="select" id="wrongFilterSelect">' + filterOpts + '</select>' +
         '<button class="btn btn-ghost btn-sm" type="button" data-toggle-mastered>' +
           (state.showMastered ? '隐藏已掌握（' : '显示已掌握（') + masterKeys.length + '）</button>' +
-      '</div>';
+      '</div>' +
+      '<div class="reason-filters">' + reasonFilters + '</div>';
 
-    if (!list.length) {
+    if (!entries.length) {
       html += '<div class="empty-state"><div class="big">错词本是空的</div>' +
-        '<p>听写中拼错的词会自动收集到这里，方便针对性重练。</p>' +
+        '<p>学习页点「已错」标记难点词，或听写中拼错的词会自动收集到这里。</p>' +
         '<p><a href="#/dictation">去听写 →</a></p></div>';
     } else {
-      html += '<div class="result-meta">共 ' + list.length + ' 条活跃错词</div>';
+      html += '<div class="result-meta">共 ' + entries.length + ' 条活跃错词' +
+        (list.length !== entries.length ? '（当前筛选 ' + list.length + ' 条）' : '') + '</div>';
       html += list.map(function (e) {
+        var countLabel = (e.count && e.count > 0) ? '错 ' + e.count + ' 次' : '手动标记';
         return '<div class="wrong-item">' +
           '<div class="wrong-item-top">' +
             '<span class="wrong-headword">' + esc(e.headword) + '</span>' +
-            '<span class="wrong-count">错 ' + e.count + ' 次</span>' +
+            '<span class="wrong-count">' + countLabel + '</span>' +
             '<span class="wrong-tags">p' + (e.page || '?') + ' · ' + esc(e.scenario || e.scenarioId || '') + '</span>' +
           '</div>' +
           '<div class="word-meaning">' + esc(e.display === e.headword ? e.meaning : (e.display + ' — ' + e.meaning)) + '</div>' +
           (e.lastReason ? '<div class="wrong-reason">最近原因：' + esc(e.lastReason) + '</div>' : '') +
+          '<div class="wrong-tags-row">' + reasonChipHtml(e, true) + '</div>' +
           '<div class="wrong-actions">' +
             '<button class="speak-btn" type="button" data-speak="' + esc(e.headword) + '" data-accent="uk">英</button>' +
             '<button class="speak-btn" type="button" data-speak="' + esc(e.headword) + '" data-accent="us">美</button>' +
@@ -653,10 +810,11 @@
     if (state.showMastered && masterKeys.length) {
       html += '<h3 style="margin:18px 0 8px;font-size:14px;color:var(--muted)">已掌握</h3>';
       masterKeys.forEach(function (k) {
-        var e = store.wrong[k];
+        var e = store.wrong[k] || { headword: k };
         html += '<div class="wrong-item mastered-dim">' +
           '<div class="wrong-item-top"><span class="wrong-headword">' + esc(k) + '</span>' +
-          '<span class="wrong-tags">' + esc(e ? e.meaning : '') + '</span></div>' +
+          '<span class="wrong-tags">' + esc(e.meaning || '') + '</span></div>' +
+          '<div class="wrong-tags-row">' + reasonChipHtml(e, false) + '</div>' +
           '<div class="wrong-actions">' +
             '<button class="speak-btn" type="button" data-speak="' + esc(k) + '" data-accent="uk">英</button>' +
             '<button class="speak-btn" type="button" data-speak="' + esc(k) + '" data-accent="us">美</button>' +
@@ -813,6 +971,90 @@
     t = e.target.closest('[data-dagain]');
     if (t) { buildQueue(); renderDictation(); return; }
 
+    // 学习页：已错标记 popover
+    t = e.target.closest('[data-wmark]');
+    if (t) {
+      var wid = t.getAttribute('data-wmark');
+      if (state.wPop && state.wPop.wordId === wid) {
+        state.wPop = null;
+      } else {
+        var w0 = findWordById(wid);
+        var ent0 = w0 ? findWrongEntryForWord(w0) : null;
+        state.wPop = { wordId: wid, draft: ent0 ? reasonTagsOf(ent0) : [] };
+      }
+      renderLearn();
+      return;
+    }
+
+    t = e.target.closest('[data-wtag]');
+    if (t) {
+      if (!state.wPop) return;
+      var tg = t.getAttribute('data-wtag');
+      var ix = state.wPop.draft.indexOf(tg);
+      if (ix >= 0) state.wPop.draft.splice(ix, 1);
+      else state.wPop.draft.push(tg);
+      renderLearn();
+      return;
+    }
+
+    t = e.target.closest('[data-wconfirm]');
+    if (t) {
+      if (!state.wPop || !state.wPop.draft.length) return;
+      var w1 = findWordById(state.wPop.wordId);
+      if (w1) manualMarkWrong(w1, state.wPop.draft);
+      state.wPop = null;
+      renderLearn();
+      return;
+    }
+
+    t = e.target.closest('[data-wcancel]');
+    if (t) {
+      state.wPop = null;
+      renderLearn();
+      return;
+    }
+
+    t = e.target.closest('[data-wremove]');
+    if (t) {
+      var w2 = findWordById(state.wPop.wordId);
+      if (w2) removeWrongForWord(w2);
+      state.wPop = null;
+      renderLearn();
+      return;
+    }
+
+    // 错词本：直接切换条目错因标签
+    t = e.target.closest('[data-entry-tag]');
+    if (t) {
+      var key = t.getAttribute('data-entry-tag');
+      var tag = t.getAttribute('data-tag');
+      var ent = store.wrong[key];
+      if (!ent) return;
+      var cur = reasonTagsOf(ent).slice();
+      var p = cur.indexOf(tag);
+      if (p >= 0) {
+        if (cur.length === 1) {
+          // 不允许取消最后一个错因：轻抖动提示
+          t.classList.add('denied');
+          setTimeout(function () { t.classList.remove('denied'); }, 450);
+          return;
+        }
+        cur.splice(p, 1);
+      } else {
+        cur.push(tag);
+      }
+      setEntryTags(key, cur);
+      renderWrong();
+      return;
+    }
+
+    t = e.target.closest('[data-reason-filter]');
+    if (t) {
+      state.wrongReasonFilter = t.getAttribute('data-reason-filter');
+      renderWrong();
+      return;
+    }
+
     // 错词本
     t = e.target.closest('[data-master]');
     if (t) {
@@ -840,26 +1082,6 @@
 
     t = e.target.closest('[data-toggle-mastered]');
     if (t) { state.showMastered = !state.showMastered; renderWrong(); return; }
-  });
-
-  appEl.addEventListener('change', function (e) {
-    var t = e.target.closest('[data-learn]');
-    if (t) {
-      var id = t.getAttribute('data-learn');
-      if (t.checked) store.learned[id] = 1;
-      else delete store.learned[id];
-      persistLearn();
-      // 重绘进度条但不打断浏览
-      var sc = scenarioById(state.scenarioId);
-      var scWords = wordsByScenario(sc.id);
-      var learnedCnt = scWords.filter(function (w) { return store.learned[w.id]; }).length;
-      var pct = scWords.length ? Math.round(learnedCnt / scWords.length * 100) : 0;
-      var fill = document.querySelector('.progress-fill');
-      if (fill) fill.style.width = pct + '%';
-      var meta = document.querySelector('.progress-meta span');
-      if (meta) meta.textContent = sc.name + ' 已学 ' + learnedCnt + ' / ' + scWords.length;
-      t.closest('.learn-toggle').classList.toggle('checked', t.checked);
-    }
   });
 
   appEl.addEventListener('keydown', function (e) {

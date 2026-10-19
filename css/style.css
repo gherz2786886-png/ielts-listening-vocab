@@ -451,25 +451,126 @@ body {
   color: #fff;
 }
 
-.learn-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
+/* ---------- 已错标记按钮 + popover ---------- */
+.word-card { position: relative; }
+
+.wrong-toggle {
+  flex: none;
   min-height: 44px;
-  cursor: pointer;
-  font-size: 13px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
   color: var(--muted);
-  user-select: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
-.learn-toggle input {
-  width: 19px;
-  height: 19px;
-  accent-color: var(--primary);
+.wrong-toggle:hover { border-color: var(--faint); }
+
+.wrong-toggle.marked {
+  border-color: var(--red);
+  color: var(--red);
+  background: var(--red-bg);
+}
+
+.pop {
+  position: absolute;
+  top: 54px;
+  right: 12px;
+  z-index: 15;
+  width: min(260px, calc(100vw - 36px));
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 8px 26px rgba(29, 42, 40, 0.2);
+  padding: 12px;
+}
+
+.pop-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.pop-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* ---------- 错因标签 chip（意思=琥珀 / 拼写=珊瑚红 / 听错=蓝） ---------- */
+.chip-tag {
+  appearance: none;
+  flex: none;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
 }
 
-.learn-toggle.checked { color: var(--green); font-weight: 600; }
+.chip-tag.t-meaning {
+  --tag: #B45309;
+  --tag-bg: #FDF0E0;
+  --tag-line: #EBCB9A;
+}
+
+.chip-tag.t-spelling {
+  --tag: #C2402A;
+  --tag-bg: #FBEBE7;
+  --tag-line: #E8B4AA;
+}
+
+.chip-tag.t-listening {
+  --tag: #2563A8;
+  --tag-bg: #E4EEF8;
+  --tag-line: #B9D0E8;
+}
+
+.chip-tag.on {
+  background: var(--tag-bg);
+  border-color: var(--tag-line);
+  color: var(--tag);
+}
+
+.chip-tag.readonly { cursor: default; }
+
+.chip-tag.denied {
+  animation: tag-shake 0.4s;
+  border-color: var(--red);
+  color: var(--red);
+}
+
+@keyframes tag-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.wrong-tags-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0 2px;
+}
+
+.reason-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+}
+
+.reason-filters .chip { min-height: 44px; }
 
 /* ---------- 搜索结果 ---------- */
 .result-meta {
