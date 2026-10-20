@@ -1,5 +1,13 @@
 # Change log
 
+## 2026-10-20 — Cancel Jijing playback on settings changes
+
+- Stop the old pronunciation and cancel queued number/code fragments when changing the practice day, PDF group or accent. Do not autoplay a new item.
+- Preserve answer records and persist the new setting; use the existing audio cancellation lifecycle.
+- Add held-media regressions for day, PDF group and accent switches, stale media events, subsequent playback and reload persistence.
+
+The three new workflows fail on the prior release because the old clip remains active. Full validation and rollback are recorded in SETTINGS_AUDIO_REVIEW.md.
+
 ## 2026-10-20 — Original scene-page recordings
 
 - Add original P2–P30 recordings beside the scene learning-page navigation, with native playback, pause, seek and volume controls; wrap below navigation on mobile.

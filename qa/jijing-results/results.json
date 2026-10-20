@@ -20,6 +20,18 @@
     "passed": true
   },
   {
+    "name": "day change stops old audio and queued fragments without changing records",
+    "passed": true
+  },
+  {
+    "name": "PDF group change stops old audio and queued fragments without changing records",
+    "passed": true
+  },
+  {
+    "name": "accent change stops old audio and queued fragments without changing records",
+    "passed": true
+  },
+  {
     "name": "automatic code, phone, number and money readings have no manual selector",
     "passed": true
   },

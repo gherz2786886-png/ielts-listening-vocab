@@ -68,3 +68,7 @@ The global numeric preference and unsplit alphanumeric path caused the user-repo
 ## 2026-10-20 Original scene-page recording playback
 
 The requested original recording was absent from the learning page. Source inspection found all 29 P2–P30 files, including irregularly named P17. They contain AAC audio despite their MP3 extensions. Direct stream copying preserves the original compressed audio while omitting the large video streams. The site now maps page numbers to on-demand native audio controls. Lifecycle, provenance, real-media checks, the corrected asynchronous test wait and rollback are documented in [PAGE_RECORDING_REVIEW.md](PAGE_RECORDING_REVIEW.md). No system configuration was changed.
+
+## 2026-10-20 Jijing settings/audio mismatch
+
+Changing the selected day, PDF group or accent re-rendered the page with “发音就绪” while the old audio/queued fragments continued. Three held-media browser workflows reproduce this on the previous release. Recognized setting changes now call the existing cancellation lifecycle before persisting and rendering. Answer records and data are untouched; see [SETTINGS_AUDIO_REVIEW.md](SETTINGS_AUDIO_REVIEW.md).

@@ -312,6 +312,8 @@
     else if (target.id === 'jScope') state.scope = target.value;
     else if (target.id === 'jOrder') state.order = target.value;
     else return;
+    // A new setting invalidates both the current clip and queued number fragments.
+    global.VocabAudio.stop();
     persist(); render(state.view);
   });
   app.addEventListener('input', function (event) {
