@@ -37,6 +37,19 @@ async function test(browser, name, run, options = {}) {
 async function listenText(page) {
   return page.evaluate(() => window.__plays.map(url => new URL(url).searchParams.get('audio')));
 }
+function holdWordAudio() {
+  window.__heldAudios = [];
+  window.Audio = class extends EventTarget {
+    constructor(src) { super(); this.src = src; this.paused = true; window.__heldAudios.push(this); }
+    play() { this.paused = false; window.__plays.push(this.src); queueMicrotask(() => this.dispatchEvent(new Event('playing'))); return Promise.resolve(); }
+    pause() { this.paused = true; }
+    load() {} removeAttribute(name) { if (name === 'src') this.src = ''; }
+  };
+  if (!localStorage.getItem('ieltsJijing.v1')) localStorage.setItem('ieltsJijing.v1', JSON.stringify({
+    settings: { day: 28, accent: 'uk' },
+    records: { 'j2019-d05-003': { attempts: 4, errors: 2, wrong: true, lastInput: 'bak door', lastReason: '拼写错误' } }
+  }));
+}
 (async () => {
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
   try {
@@ -95,6 +108,33 @@ async function listenText(page) {
       await page.locator('#jijingLibrary').click();
       assert.equal(await page.locator('#jDay').inputValue(), '29');
     });
+    for (const [name, control, value] of [
+      ['day change', '#jDay', '29'],
+      ['PDF group change', '#jDay', 'pdf-2022-44'],
+      ['accent change', '#jAccent', 'us']
+    ]) {
+      await test(browser, name + ' stops old audio and queued fragments without changing records', async page => {
+        const records = await page.evaluate(() => JSON.parse(localStorage.getItem('ieltsJijing.v1')).records);
+        await page.locator('[data-jplay="j2019-d05-004"]').click();
+        await page.waitForFunction(() => window.__heldAudios.length === 1 && !!window.VocabAudio.current);
+        await page.locator(control).selectOption(value);
+        assert.equal(await page.evaluate(() => window.VocabAudio.current), null, 'Old audio is still active after changing settings');
+        assert.equal(await page.evaluate(() => window.__heldAudios[0].paused && !window.__heldAudios[0].src), true);
+        await page.evaluate(() => {
+          window.__heldAudios[0].dispatchEvent(new Event('ended'));
+          window.__heldAudios[0].dispatchEvent(new Event('playing'));
+        });
+        assert.equal(await page.evaluate(() => window.__plays.length), 1, 'Cancelled sequence must not start the next fragment');
+        assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('ieltsJijing.v1')).records), records);
+        assert.equal(await page.locator('#jPlayback').innerText(), '发音就绪');
+        await page.locator('[data-jplay]').first().click();
+        await page.waitForFunction(() => window.__heldAudios.length === 2);
+        assert.equal(await page.evaluate(() => new URL(window.__plays[1]).searchParams.get('type')), control === '#jAccent' ? '2' : '1');
+        await page.reload();
+        assert.equal(await page.locator(control).inputValue(), value);
+        assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('ieltsJijing.v1')).records), records);
+      }, { init: holdWordAudio });
+    }
     await test(browser, 'automatic code, phone, number and money readings have no manual selector', async page => {
       assert.equal(await page.locator('#jNumberMode').count(), 0);
       await page.locator('.j-number-demo summary').click();
