@@ -156,3 +156,18 @@ node qa/review_audio_regressions.js
 提取器需要 pypdf，仅用于维护词库；网页本身仍无需安装依赖或构建。`scripts/extract_jijing.py` 保留为 Day28–30 历史样板提取参考，运行它会将词库缩回三日，不能用于更新完整词库。
 
 自动读法的规则、验证和回滚见 [AUTO_NUMBER_REVIEW.md](AUTO_NUMBER_REVIEW.md)。
+
+## 场景词整页原始录音（P2–P30）
+
+场景词学习页的页码栏右侧新增「整页录音」，随当前页码切换对应原始录音。支持播放、暂停、拖动进度和音量控制；手机上显示在页码栏下一行。点击单词发音会暂停整页录音，恢复整页录音会停止单词发音。翻页、搜索或离开学习页会停止旧录音；同页标记错词时保留播放进度。网络加载失败会显示手动「重新加载」按钮，不自动循环重试。
+
+29 页音轨共 **35,934,445 字节（约35.9 MB）**，从用户提供的原始资料直接复制 AAC 音轨，未重新编码。保留原录音顺序与停顿；不是把单词合成发音拼起来。音频位于 `audio/pages/`，与网站一起托管，不依赖本机运行；打开页面时 `preload="none"`，点击播放后才加载对应录音。该静态网站及音频为公开链接，无登录访问限制。
+
+原资料仍留在本地，没有删除文件或释放本地磁盘空间。原文件虽有 `.MP3` 后缀，实际是含 AAC 音轨的 MP4/MOV 容器，其中 P17 的文件名为 `P17面-顺序版.mp3`。来源、文件哈希、复制音轨哈希及回滚方法见 [PAGE_RECORDING_REVIEW.md](PAGE_RECORDING_REVIEW.md)；逐页清单见 `data/page-recordings.json`。
+
+```sh
+node qa/page_recording_tests.js /path/to/playwright
+python scripts/extract_page_recordings.py --source-root /path/to/page-recordings --ffmpeg /path/to/ffmpeg --ffprobe /path/to/ffprobe --output-root /path/to/empty-output
+```
+
+维护提取器需要已有 FFmpeg/FFprobe，默认拒绝覆盖音频。另行指定输出目录时，应先创建其中的 `data/` 子目录；测试使用临时 Edge 上下文并验证真实本地媒体解码、播放和拖动，不修改用户浏览器记录。

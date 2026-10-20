@@ -449,6 +449,7 @@
         '<button class="btn btn-ghost" type="button" data-page-next' +
           (state.page >= sc.endPage ? ' disabled' : '') + '>下一页</button>' +
         '<span class="pagenum">p' + state.page + '</span>' +
+        '<div class="page-recording-slot" id="pageRecordingSlot"></div>' +
       '</div>';
 
     // ---- 进度（已错）----
@@ -485,6 +486,7 @@
   }
 
   function afterLearnRender() {
+    if (window.PageRecording) PageRecording.mount(document.getElementById('pageRecordingSlot'), state.page);
     var si = document.getElementById('searchInput');
     if (si) {
       si.addEventListener('input', function (event) {
@@ -908,6 +910,7 @@
 
   function router() {
     stopQuizAudio();
+    if (window.PageRecording) PageRecording.unmount();
     var h = (location.hash || '#/learn').replace(/^#\/?/, '');
     var qi = h.indexOf('?');
     var route = qi >= 0 ? h.slice(0, qi) : h;

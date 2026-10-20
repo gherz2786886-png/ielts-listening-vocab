@@ -1,5 +1,15 @@
 # Change log
 
+## 2026-10-20 — Original scene-page recordings
+
+- Add original P2–P30 recordings beside the scene learning-page navigation, with native playback, pause, seek and volume controls; wrap below navigation on mobile.
+- Extract 29 AAC tracks without re-encoding from the supplied source media, reducing published media to 35,934,445 bytes. Verify identical compressed audio-packet hashes and retain source provenance in the manifest.
+- Load recordings on demand, switch without autoplay, stop on search/route changes, preserve position during same-page wrong-word updates, and prevent overlapping word/page playback.
+- Surface load errors with one explicit retry action and ignore stale callbacks after page changes.
+- Keep scene/Jijing vocabulary, numeric reading, grading, storage keys and original local media unchanged.
+
+Validation: all 29 native recordings decode/play; 10 media/browser workflows, 12 scene workflows, 17 audio regressions and 92 reading/grading cases plus 26 source assertions pass. Details, retained limitations and rollback: PAGE_RECORDING_REVIEW.md.
+
 ## 2026-10-19 — Reliability review
 
 - Prevent non-terminating grading for Unicode spaces, en dashes and em dashes.

@@ -64,3 +64,7 @@ Day28–101 and source-only PDF groups are implemented and validated. Source ali
 ## Automatic readout correction
 
 The global numeric preference and unsplit alphanumeric path caused the user-reported behavior. The manual control and preference dependency are removed, with ordered automatic rules and a richer trial input. Regression, media and recovery evidence is documented in [AUTO_NUMBER_REVIEW.md](AUTO_NUMBER_REVIEW.md).
+
+## 2026-10-20 Original scene-page recording playback
+
+The requested original recording was absent from the learning page. Source inspection found all 29 P2–P30 files, including irregularly named P17. They contain AAC audio despite their MP3 extensions. Direct stream copying preserves the original compressed audio while omitting the large video streams. The site now maps page numbers to on-demand native audio controls. Lifecycle, provenance, real-media checks, the corrected asynchronous test wait and rollback are documented in [PAGE_RECORDING_REVIEW.md](PAGE_RECORDING_REVIEW.md). No system configuration was changed.

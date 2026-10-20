@@ -1,0 +1,46 @@
+{
+  "pages": 29,
+  "mediaBytes": 35934445,
+  "results": [
+    {
+      "name": "no recording bytes load at startup; desktop control is to the right of page number",
+      "passed": true
+    },
+    {
+      "name": "all 29 page recordings decode and actually start playing",
+      "passed": true
+    },
+    {
+      "name": "seek, pause/resume and same-page wrong marks retain the native audio position",
+      "passed": true
+    },
+    {
+      "name": "page changes stop and release the old recording; late errors cannot affect the new page",
+      "passed": true
+    },
+    {
+      "name": "search and route switches stop recording and never autoplay another page",
+      "passed": true
+    },
+    {
+      "name": "word audio and original page recording interrupt each other",
+      "passed": true
+    },
+    {
+      "name": "load errors are visible and one manual retry restores original playback",
+      "passed": true
+    },
+    {
+      "name": "mobile recording controls do not overflow at 320",
+      "passed": true
+    },
+    {
+      "name": "mobile recording controls do not overflow at 375",
+      "passed": true
+    },
+    {
+      "name": "mobile recording controls do not overflow at 390",
+      "passed": true
+    }
+  ]
+}
