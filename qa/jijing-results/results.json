@@ -48,6 +48,14 @@
     "passed": true
   },
   {
+    "name": "ordinary phrases and replay use one utterance without revealing the quiz answer",
+    "passed": true
+  },
+  {
+    "name": "stop and route switches cancel complete recordings and ignore late starts",
+    "passed": true
+  },
+  {
     "name": "source alternatives 4 and 4.00 remain accepted",
     "passed": true
   },

@@ -1,0 +1,79 @@
+{
+  "sourceReadouts": 471,
+  "files": 950,
+  "errors": [],
+  "results": [
+    {
+      "text": "the first of August",
+      "accent": "uk",
+      "duration": 1.92,
+      "starts": 1,
+      "passed": true
+    },
+    {
+      "text": "the first of August",
+      "accent": "us",
+      "duration": 2.28,
+      "starts": 1,
+      "passed": true
+    },
+    {
+      "text": "back door",
+      "accent": "uk",
+      "duration": 1.296,
+      "starts": 1,
+      "passed": true
+    },
+    {
+      "text": "back door",
+      "accent": "us",
+      "duration": 1.8,
+      "starts": 1,
+      "passed": true
+    },
+    {
+      "text": "two seven one nine six three",
+      "accent": "uk",
+      "duration": 2.76,
+      "starts": 1,
+      "passed": true
+    },
+    {
+      "text": "two seven one nine six three",
+      "accent": "us",
+      "duration": 2.904,
+      "starts": 1,
+      "passed": true
+    },
+    {
+      "text": "twenty-five thousand dollars",
+      "accent": "uk",
+      "passed": true
+    },
+    {
+      "text": "twenty-five thousand dollars",
+      "accent": "us",
+      "passed": true
+    },
+    {
+      "text": "A C eight double three T",
+      "accent": "uk",
+      "passed": true
+    },
+    {
+      "text": "A C eight double three T",
+      "accent": "us",
+      "passed": true
+    },
+    {
+      "text": "eight pounds and fifty pence",
+      "accent": "uk",
+      "passed": true
+    },
+    {
+      "text": "eight pounds and fifty pence",
+      "accent": "us",
+      "passed": true
+    }
+  ]
+}

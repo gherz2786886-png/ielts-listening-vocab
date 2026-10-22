@@ -126,8 +126,9 @@
         mainSettled = true;
         clearTimer();
         releaseAudio();
-        emit('vocab-audio-fallback', { text: text, accent: accent, reason: reason });
-        try { if (typeof opts.onFallback === 'function') opts.onFallback(reason); } catch (e) {}
+        // Intentional whole-phrase speech is not an online-audio failure.
+        if (reason) emit('vocab-audio-fallback', { text: text, accent: accent, reason: reason });
+        try { if (reason && typeof opts.onFallback === 'function') opts.onFallback(reason); } catch (e) {}
         if (!supported().tts) { finish(new Error('speechSynthesis unavailable')); return; }
         try {
           var synth = global.speechSynthesis;
@@ -135,13 +136,17 @@
           utter.lang = accent === 'uk' ? 'en-GB' : 'en-US';
           utter.rate = 0.95;
           state.utter = utter;
+          var speechStarted = false;
           utter.onstart = function () {
             if (!active()) return;
+            speechStarted = true;
             clearTtsTimer();
             state.ttsTimer = setTimeout(function () { finish(new Error('speech playback timed out')); }, Math.max(30000, text.length * 300));
             emit('vocab-audio-started', { text: text, accent: accent, channel: 'speech' });
           };
-          utter.onend = function () { finish(); };
+          utter.onend = function () {
+            finish(speechStarted ? null : new Error('speech ended before playback started'));
+          };
           utter.onerror = function (event) {
             if (!active()) return;
             finish(new Error('tts error: ' + (event && event.error)));
@@ -166,8 +171,9 @@
           } else start();
         } catch (error) { finish(error); }
       }
+      if (opts.speechOnly) { fallbackToTTS(); return; }
       var audio;
-      try { audio = new global.Audio(urlFor(text, accent)); }
+      try { audio = new global.Audio(opts.url || urlFor(text, accent)); }
       catch (error) { fallbackToTTS('audio-ctor-failed'); return; }
       state.audio = audio;
       audio.preload = 'auto';
@@ -177,7 +183,7 @@
       audio.addEventListener('playing', function () {
         if (active() && !mainSettled) {
           clearTimer();
-          emit('vocab-audio-started', { text: text, accent: accent, channel: 'online' });
+          emit('vocab-audio-started', { text: text, accent: accent, channel: opts.channel || 'online' });
         }
       });
       audio.addEventListener('ended', function () {
