@@ -142,7 +142,9 @@ node qa/review_browser_regressions.js
 
 金额、日期、数量、号码和字母数字编码自动识别，界面不再提供“纯数字读法”选项，旧浏览器保存的 digits/cardinal 偏好也不再参与发音。`AC832T → A C eight three two T`，`AC833T → A C eight double three T`，`Phone: 33 → double three`；`$25000 → twenty-five thousand dollars`，`8.50 pounds → eight pounds and fifty pence`。没有号码标记的短整数按普通数值读（`33 → thirty-three`），超过4位的无单位数字、前导零和分段号码按号码读；P2–P4/S2–S4 题目中的无单位整数按数量读。币种、金额标签、日期及数量单位优先于位数。未标币种的金额不擅自添加 dollars；缺少题意的裸数字不能保证语义完全识别。试播区支持输入号码、编码或金额，无需选择模式。数字答案填写数字，编码按原文填写；专有名词读音仍需结合原资料核对。
 
-发音按需请求词典单词片段，失败时回退可用浏览器语音；没有上传原始大体积音视频，也没有删除本地文件。网络与设备英语语音会影响播放，不能声称每个专名都经过真人听校。新机经记录保存在当前浏览器 `ieltsJijing.v1`，与场景词记录分开，暂不跨设备同步。
+机经的多词读法使用完整的英音/美音合成音频，按需从网站加载，一项一段，不再逐词拼接；单个词仍优先词典发音。号码、编码、日期和金额先自动展开成原有读法，再整段合成。已有词库的连读不依赖设备安装英语语音；自输试播中尚未预生成的多词内容使用浏览器整段语音，设备语音不可用时会报错，不静默拆词。合成音频不是原老师录音，不能声称每个专名都经过真人听校。新机经记录保存在当前浏览器 `ieltsJijing.v1`，与场景词记录分开，暂不跨设备同步。
+
+完整连读的生成、校验、设备语音限制与回滚见 [CONNECTED_SPEECH_REVIEW.md](CONNECTED_SPEECH_REVIEW.md)。
 
 验证与每日映射见 [JIJING_FULL_REVIEW.md](JIJING_FULL_REVIEW.md)；早期样板记录见 [JIJING_REVIEW.md](JIJING_REVIEW.md)。
 

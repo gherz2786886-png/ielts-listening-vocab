@@ -13,9 +13,34 @@ async function test(browser, name, run, options = {}) {
   const context = await browser.newContext({ viewport: options.viewport || { width: 1440, height: 900 } });
   await context.addInitScript(() => {
     window.__plays = [];
+    window.__readouts = [];
+    window.__utterances = [];
+    window.__speechCancels = 0;
+    window.__captureAudio = function (src) {
+      const clips = (window.JIJING_RECORDINGS || {}).clips || {};
+      const entry = Object.entries(clips).find(([, accents]) => accents.uk === src || accents.us === src);
+      const query = new URL(src, location.href).searchParams;
+      window.__readouts.push({ text: entry ? entry[0] : query.get('audio'),
+        accent: entry ? (entry[1].us === src ? 'us' : 'uk') : (query.get('type') === '2' ? 'us' : 'uk'),
+        channel: entry ? 'recording' : 'online' });
+    };
+    window.SpeechSynthesisUtterance = class { constructor(text) { this.text = text; } };
+    Object.defineProperty(window, 'speechSynthesis', { configurable: true, value: {
+      getVoices: () => [{ lang: 'en-GB' }, { lang: 'en-US' }],
+      cancel() { window.__speechCancels++; },
+      speak(utterance) {
+        window.__utterances.push(utterance);
+        window.__readouts.push({ text: utterance.text, accent: utterance.lang === 'en-US' ? 'us' : 'uk', channel: 'speech' });
+        queueMicrotask(() => { if (utterance.onstart) utterance.onstart(); if (utterance.onend) utterance.onend(); });
+      }
+    } });
     window.Audio = class extends EventTarget {
       constructor(src) { super(); this.src = src; }
-      play() { window.__plays.push(this.src); queueMicrotask(() => { this.dispatchEvent(new Event('playing')); this.dispatchEvent(new Event('ended')); }); return Promise.resolve(); }
+      play() {
+        window.__plays.push(this.src);
+        window.__captureAudio(this.src);
+        queueMicrotask(() => { this.dispatchEvent(new Event('playing')); this.dispatchEvent(new Event('ended')); }); return Promise.resolve();
+      }
       load() {} pause() {} removeAttribute(name) { if (name === 'src') this.src = ''; }
     };
   });
@@ -35,13 +60,22 @@ async function test(browser, name, run, options = {}) {
   } finally { await context.close(); }
 }
 async function listenText(page) {
-  return page.evaluate(() => window.__plays.map(url => new URL(url).searchParams.get('audio')));
+  return page.evaluate(() => window.__readouts.map(readout => readout.text));
 }
 function holdWordAudio() {
   window.__heldAudios = [];
+  window.speechSynthesis.speak = function (utterance) {
+    window.__utterances.push(utterance);
+    window.__readouts.push({ text: utterance.text, accent: utterance.lang === 'en-US' ? 'us' : 'uk', channel: 'speech' });
+    queueMicrotask(() => { if (utterance.onstart) utterance.onstart(); });
+  };
   window.Audio = class extends EventTarget {
     constructor(src) { super(); this.src = src; this.paused = true; window.__heldAudios.push(this); }
-    play() { this.paused = false; window.__plays.push(this.src); queueMicrotask(() => this.dispatchEvent(new Event('playing'))); return Promise.resolve(); }
+    play() {
+      this.paused = false; window.__plays.push(this.src);
+      window.__captureAudio(this.src);
+      queueMicrotask(() => this.dispatchEvent(new Event('playing'))); return Promise.resolve();
+    }
     pause() { this.paused = true; }
     load() {} removeAttribute(name) { if (name === 'src') this.src = ''; }
   };
@@ -124,12 +158,12 @@ function holdWordAudio() {
           window.__heldAudios[0].dispatchEvent(new Event('ended'));
           window.__heldAudios[0].dispatchEvent(new Event('playing'));
         });
-        assert.equal(await page.evaluate(() => window.__plays.length), 1, 'Cancelled sequence must not start the next fragment');
+        assert.equal(await page.evaluate(() => window.__readouts.length), 1, 'Cancelled speech must not restart');
         assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('ieltsJijing.v1')).records), records);
         assert.equal(await page.locator('#jPlayback').innerText(), '发音就绪');
         await page.locator('[data-jplay]').first().click();
-        await page.waitForFunction(() => window.__heldAudios.length === 2);
-        assert.equal(await page.evaluate(() => new URL(window.__plays[1]).searchParams.get('type')), control === '#jAccent' ? '2' : '1');
+        await page.waitForFunction(() => window.__readouts.length === 2);
+        assert.equal(await page.evaluate(() => window.__readouts[1].accent), control === '#jAccent' ? 'us' : 'uk');
         await page.reload();
         assert.equal(await page.locator(control).inputValue(), value);
         assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('ieltsJijing.v1')).records), records);
@@ -139,14 +173,14 @@ function holdWordAudio() {
       assert.equal(await page.locator('#jNumberMode').count(), 0);
       await page.locator('.j-number-demo summary').click();
       await page.locator('[data-jdemo]').click();
-      assert.deepEqual(await listenText(page), ['A', 'C', 'eight', 'three', 'two', 'T']);
+      assert.deepEqual(await listenText(page), ['A C eight three two T']);
       assert.match(await page.locator('#jDemoText').innerText(), /AC832T → A C eight three two T/);
       for (const [value, expected] of [
-        ['Phone: 33', ['double', 'three']],
-        ['33', ['thirty', 'three']],
-        ['$25000', ['twenty', 'five', 'thousand', 'dollars']],
-        ['8.50 pounds', ['eight', 'pounds', 'and', 'fifty', 'pence']],
-        ['AC833T', ['A', 'C', 'eight', 'double', 'three', 'T']]
+        ['Phone: 33', ['double three']],
+        ['33', ['thirty-three']],
+        ['$25000', ['twenty-five thousand dollars']],
+        ['8.50 pounds', ['eight pounds and fifty pence']],
+        ['AC833T', ['A C eight double three T']]
       ]) {
         const before = (await listenText(page)).length;
         await page.locator('#jDemo').fill(value);
@@ -202,11 +236,45 @@ function holdWordAudio() {
     await test(browser, 'date playback and alternate written date are accepted', async page => {
       await page.locator('#jDay').selectOption('29');
       await page.locator('[data-jsingle="j2019-d06-005"]').click();
-      assert.deepEqual(await listenText(page), ['the', 'first', 'of', 'August']);
+      assert.deepEqual(await listenText(page), ['the first of August']);
+      assert.equal(await page.evaluate(() => window.__plays.length), 1, 'One complete recording, not separate words');
+      assert.equal(await page.evaluate(() => window.__utterances.length), 0, 'Known readouts do not depend on device voices');
       await page.locator('#jAnswer').fill('August 1st');
       await page.locator('[data-jsubmit]').click();
       assert.equal(await page.locator('.result-box.ok').count(), 1);
+      await page.screenshot({ path: path.join(output, 'connected-date-desktop.png'), fullPage: false });
     });
+    await test(browser, 'ordinary phrases and replay use one utterance without revealing the quiz answer', async page => {
+      await page.locator('[data-jplay="j2019-d05-003"]').click();
+      assert.deepEqual(await listenText(page), ['back door']);
+      assert.equal(await page.evaluate(() => window.__plays.length), 1);
+      assert.equal(await page.locator('#appNotice').isVisible(), false);
+      await page.locator('#jAccent').selectOption('us');
+      await page.locator('[data-jsingle="j2019-d05-003"]').click();
+      assert.doesNotMatch(await page.locator('#app').innerText(), /back door/);
+      await page.locator('[data-jreplay]').click();
+      assert.deepEqual(await listenText(page), ['back door', 'back door', 'back door']);
+      assert.equal(await page.evaluate(() => window.__readouts.at(-1).accent), 'us');
+      assert.equal(await page.evaluate(() => window.__utterances.length), 0);
+      await page.locator('#jAnswer').fill('back door');
+      await page.locator('[data-jsubmit]').click();
+      assert.equal(await page.locator('.result-box.ok').count(), 1);
+    });
+    await test(browser, 'stop and route switches cancel complete recordings and ignore late starts', async page => {
+      await page.locator('[data-jplay="j2019-d05-003"]').click();
+      await page.waitForFunction(() => window.__heldAudios.length === 1);
+      await page.locator('[data-jstop]').click();
+      assert.equal(await page.evaluate(() => window.VocabAudio.current), null);
+      await page.evaluate(() => { window.__heldAudios[0].dispatchEvent(new Event('playing')); window.__heldAudios[0].dispatchEvent(new Event('ended')); });
+      assert.doesNotMatch(await page.locator('#jPlayback').innerText(), /正在播放/);
+      await page.locator('[data-jplay="j2019-d05-003"]').click();
+      await page.waitForFunction(() => window.__heldAudios.length === 2);
+      await page.locator('#sceneLibrary').click();
+      assert.equal(await page.evaluate(() => window.VocabAudio.current), null);
+      await page.evaluate(() => { window.__heldAudios[1].dispatchEvent(new Event('playing')); window.__heldAudios[1].dispatchEvent(new Event('ended')); });
+      assert.equal(await page.locator('#jPlayback').count(), 0);
+      assert.equal(await page.evaluate(() => window.__heldAudios.length), 2);
+    }, { init: holdWordAudio });
     await test(browser, 'source alternatives 4 and 4.00 remain accepted', async page => {
       await page.locator('[data-jsingle="j2019-d05-015"]').click();
       await page.locator('#jAnswer').fill('4.00');

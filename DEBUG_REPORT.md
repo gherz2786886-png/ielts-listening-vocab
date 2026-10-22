@@ -72,3 +72,7 @@ The requested original recording was absent from the learning page. Source inspe
 ## 2026-10-20 Jijing settings/audio mismatch
 
 Changing the selected day, PDF group or accent re-rendered the page with “发音就绪” while the old audio/queued fragments continued. Three held-media browser workflows reproduce this on the previous release. Recognized setting changes now call the existing cancellation lifecycle before persisting and rendering. Answer records and data are untouched; see [SETTINGS_AUDIO_REVIEW.md](SETTINGS_AUDIO_REVIEW.md).
+
+## 2026-10-22 Disconnected multiword readouts
+
+The Jijing playback adapter split every multiword expansion into individual dictionary requests. Thus `the first of August` had four clips and audible word breaks. Complete hosted synthetic recordings now carry the whole readout in one audio element. During real Edge testing, available device voice entries returned end events without a start; the primary source library therefore uses hosted files independently of device voices, and an unstarted speech fallback is reported as failure. Scope, alternatives, generation provenance, validation and rollback: [CONNECTED_SPEECH_REVIEW.md](CONNECTED_SPEECH_REVIEW.md).

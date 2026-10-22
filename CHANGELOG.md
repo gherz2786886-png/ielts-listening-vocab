@@ -1,5 +1,13 @@
 # Change log
 
+## 2026-10-22 — Complete connected Jijing readouts
+
+- Replace per-word pronunciation stitching with complete hosted UK/US synthetic recordings for source multiword readouts, dates, quantities, money and identifier expansions.
+- Deduplicate source readouts and share each recording across overlapping daily/PDF entries; keep written answers, automatic classification and records unchanged.
+- Reuse the cancellable audio lifecycle for hosted clips and show the connected-recording channel. Unknown trial phrases use one browser utterance rather than a word sequence.
+- Report speech ending without a start as failure, and bound test completion so unresolved promises cannot silently terminate the regression runner.
+- Record generation provenance, media hashes, source coverage, decoder checks and rollback in CONNECTED_SPEECH_REVIEW.md.
+
 ## 2026-10-20 — Cancel Jijing playback on settings changes
 
 - Stop the old pronunciation and cancel queued number/code fragments when changing the practice day, PDF group or accent. Do not autoplay a new item.

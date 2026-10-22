@@ -62,9 +62,14 @@
   }
   function spoken(item) { return global.JijingSpeech.forAnswer(item.answers[0], { part: item.part }); }
   function playText(text) {
-    var parts = global.JijingSpeech.audioParts(text);
-    if (parts.length > 1) global.VocabAudio.playSequence(parts, state.accent).catch(function () {});
-    else global.VocabAudio.play(text, state.accent).catch(function () {});
+    // Complete, hosted recordings preserve prosody independently of device voices.
+    var clips = (global.JIJING_RECORDINGS || {}).clips || {};
+    var recording = clips[text] && clips[text][state.accent];
+    var continuous = global.JijingSpeech.audioParts(text).length > 1;
+    global.VocabAudio.play(text, state.accent, {
+      url: recording, channel: recording ? 'recording' : undefined,
+      speechOnly: !recording && continuous
+    }).catch(function () {});
   }
   function play(item) { playText(spoken(item).text); }
   function settingsHtml() {
@@ -103,7 +108,7 @@
         day.status === 'source' ? 'PDF 原题组' : '按 PDF 题组顺序编排') + '</b><p>' + esc(day.alignment) +
       '</p><p>' + esc(source.file) + ' · 第 ' + day.pages.join('、') + ' 页' +
       (day.groups ? ' · 题组 ' + esc(day.groups.join('、')) : '') + ' · ' + day.items.length + ' 项</p></div>' +
-      '<p class="result-meta">自动识别金额、数量和号码；编码逐位读字母与数字，号码重复数字用 double / triple。语音可能回退到浏览器合成。</p>' +
+      '<p class="result-meta">短语、日期和金额播放完整连读音频，单词优先词典发音。号码与编码自动识别，重复数字用 double / triple。</p>' +
       '<div class="j-toolbar"><button class="btn btn-ghost" data-jselect-all>全选</button>' +
       '<button class="btn btn-ghost" data-jselect-none>清空选择</button>' +
       '<button class="btn btn-primary" data-jstart-selected' + (selected.length ? '' : ' disabled') +
@@ -331,9 +336,15 @@
     if (app.dataset.library !== 'jijing') return;
     var status = document.getElementById('jPlayback');
     if (status) {
-      status.textContent = event.detail.channel === 'online' ? '正在播放词典发音…' : '正在播放浏览器语音…';
+      status.textContent = event.detail.channel === 'recording' ? '正在播放连读音频…' :
+        event.detail.channel === 'online' ? '正在播放词典发音…' : '正在播放浏览器语音…';
       status.dataset.starts = String(Number(status.dataset.starts || 0) + 1);
     }
+  });
+  document.addEventListener('vocab-audio-error', function () {
+    if (app.dataset.library !== 'jijing') return;
+    var status = document.getElementById('jPlayback');
+    if (status) status.textContent = '发音未能播放，请点击重听，或检查声音与网络。';
   });
   global.JijingApp = { render: render };
 })(window);

@@ -57,6 +57,7 @@ function createEnvironment(options = {}) {
     clearTimeout(id) { timers.delete(id); }
   };
   sandbox.window = sandbox;
+  if (options.speechUnavailable) { delete sandbox.speechSynthesis; delete sandbox.SpeechSynthesisUtterance; }
   vm.runInNewContext(source, sandbox, { filename: 'audio.js' });
   return {
     api: sandbox.VocabAudio, audios, spoken, events, synth,
@@ -82,6 +83,69 @@ function createEnvironment(options = {}) {
 }
 
 const tests = [
+  ['a hosted complete recording plays once and reports its actual recording channel', async () => {
+    const env = createEnvironment();
+    const pending = env.api.play('the first of August', 'us', { url: 'audio/jijing/date-us.mp3', channel: 'recording' });
+    assert.equal(env.audios.length, 1);
+    assert.equal(env.audios[0].src, 'audio/jijing/date-us.mp3');
+    env.audios[0].emit('playing');
+    assert.equal(env.events.find(e => e.type === 'vocab-audio-started').detail.channel, 'recording');
+    assert.equal(env.spoken.length, 0);
+    env.audios[0].emit('ended'); await pending;
+  }],
+  ['speech ending without a start is reported as failure instead of successful playback', async () => {
+    const env = createEnvironment({ voices: [{ lang: 'en-US' }], noSpeechStart: true });
+    const pending = env.api.play('the first of August', 'us', { speechOnly: true }).catch(error => error);
+    env.spoken[0].onend();
+    assert.match((await pending).message, /ended before playback started/);
+    assert.equal(env.events.filter(e => e.type === 'vocab-audio-started').length, 0);
+    assert.equal(env.events.filter(e => e.type === 'vocab-audio-error').length, 1);
+  }],
+  ['a date is one complete English utterance without dictionary clips or a fallback warning', async () => {
+    const env = createEnvironment({ voices: [{ lang: 'en-US', name: 'US English' }] });
+    const pending = env.api.play('the first of August', 'us', { speechOnly: true });
+    assert.equal(env.audios.length, 0);
+    assert.equal(env.spoken.length, 1);
+    assert.equal(env.spoken[0].text, 'the first of August');
+    assert.equal(env.spoken[0].lang, 'en-US');
+    assert.equal(env.spoken[0].voice.name, 'US English');
+    assert.equal(env.events.filter(e => e.type === 'vocab-audio-fallback').length, 0);
+    assert.equal(env.events.filter(e => e.type === 'vocab-audio-started').length, 1);
+    env.spoken[0].onend(); await pending;
+    assert.equal(env.api.current, null);
+  }],
+  ['code and double/triple readouts stay together in one utterance', async () => {
+    const env = createEnvironment({ voices: [{ lang: 'en-GB' }] });
+    const pending = env.api.play('A C eight double three T', 'uk', { speechOnly: true });
+    assert.equal(env.audios.length, 0);
+    assert.equal(env.spoken[0].text, 'A C eight double three T');
+    assert.equal(env.spoken[0].lang, 'en-GB');
+    env.spoken[0].onend(); await pending;
+  }],
+  ['stop before phrase voices are ready prevents delayed speech', async () => {
+    const env = createEnvironment();
+    const pending = env.api.play('back door', 'uk', { speechOnly: true });
+    assert.equal(env.audios.length, 0);
+    env.api.stop(); env.tick(10000); env.voicesChanged(); await pending;
+    assert.equal(env.spoken.length, 0);
+    assert.equal(env.api.current, null);
+  }],
+  ['continuous speech with no start event fails within five seconds', async () => {
+    const env = createEnvironment({ voices: [{ lang: 'en-GB' }], noSpeechStart: true });
+    const pending = env.api.play('twenty-five thousand dollars', 'uk', { speechOnly: true }).catch(error => error);
+    assert.equal(env.audios.length, 0);
+    env.tick(5000);
+    assert.match((await pending).message, /did not start/);
+    assert.equal(env.api.current, null);
+  }],
+  ['unavailable continuous speech reports failure without silently spelling words separately', async () => {
+    const env = createEnvironment({ speechUnavailable: true });
+    const pending = env.api.play('the first of August', 'uk', { speechOnly: true }).catch(error => error);
+    assert.equal(env.audios.length, 0);
+    const error = await pending;
+    assert.match(error.message, /speechSynthesis unavailable/);
+    assert.equal(env.api.current, null);
+  }],
   ['missing browser speech start fails within a bounded time', async () => {
     const env = createEnvironment({ voices: [{ lang: 'en-GB' }], noSpeechStart: true });
     const pending = env.api.play('unknown name', 'uk').catch(error => error);
@@ -273,13 +337,16 @@ const tests = [
 (async () => {
   let failed = 0;
   for (const [name, test] of tests) {
+    let deadline;
     try {
-      await test();
+      await Promise.race([test(), new Promise((_, reject) => {
+        deadline = setTimeout(() => reject(new Error('Regression did not settle within five seconds')), 5000);
+      })]);
       console.log('PASS ' + name);
     } catch (error) {
       failed++;
       console.error('FAIL ' + name + '\n  ' + error.message);
-    }
+    } finally { clearTimeout(deadline); }
   }
   console.log(`${tests.length - failed}/${tests.length} audio regressions passed`);
   process.exitCode = failed ? 1 : 0;
