@@ -1,5 +1,9 @@
 # Website reliability review — 2026-10-19
 
+## 2026-10-23 feedback correction
+
+Reproduced: `although → 1 August` was explained as unrelated character substitutions; `hot drinks → cold drinks` hid the word substitution; historical Jijing entries retained that misleading presentation. Preserve letter-level feedback for small errors and introduce a separate word-aware presentation layer without changing the acceptance engine. Add original-input red marks, omission markers, possible pronunciation-confusion hints, and contrast playback. Historical entries are rendered without rewriting their original records. Detailed validation, data provenance and rollback: [FEEDBACK_REVIEW.md](FEEDBACK_REVIEW.md).
+
 ## Scope and evidence
 
 Baseline: `e254c108f2e3e03c2d8675816db9e474b891cb20`.

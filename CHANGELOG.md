@@ -1,5 +1,13 @@
 # Change log
 
+## 2026-10-23 — Layer spelling correction and word-confusion feedback
+
+- Preserve fine-grained letter correction for small spelling mistakes; align phrases by words before explaining differences.
+- Keep the submitted answer intact, mark omissions explicitly, and show complete mismatches without arbitrary character-substitution explanations.
+- Add possible pronunciation-confusion hints from a licensed, pinned CMUdict subset and separate playback buttons for submitted/expected words.
+- Re-render historical Jijing feedback from existing input without rewriting records. Store original input for future scene-word mistakes; retain existing counts, tags, grading and storage keys.
+- Add spelling/word/type/escaping/record-preservation/mobile tests. See FEEDBACK_REVIEW.md for coverage, limitations and rollback.
+
 ## 2026-10-22 — Complete connected Jijing readouts
 
 - Replace per-word pronunciation stitching with complete hosted UK/US synthetic recordings for source multiword readouts, dates, quantities, money and identifier expansions.

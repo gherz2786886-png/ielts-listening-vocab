@@ -703,6 +703,19 @@ body {
 .dl-case, .dl-space, .dl-punct { color: var(--faint); }
 .dl-ukus { color: var(--primary); font-weight: 700; border-bottom: 2px solid var(--primary); }
 
+/* Keep the learner's original text visible; annotations never replace it. */
+.dictation-feedback { margin: 10px 0; color: var(--ink); overflow-wrap: anywhere; }
+.feedback-summary { margin: 0 0 10px; font-weight: 600; }
+.feedback-label { color: var(--muted); font-size: 13px; margin-top: 10px; }
+.feedback-input, .feedback-answer { white-space: pre-wrap; color: var(--ink); }
+.feedback-answer { font-size: 19px; font-weight: 600; }
+.feedback-error { color: var(--red); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.feedback-extra { text-decoration-line: line-through; }
+.feedback-missing { color: var(--red); font-weight: 800; padding: 0 2px; }
+.feedback-detail { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 8px 0; }
+.feedback-compare { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.feedback-compare .btn { white-space: normal; overflow-wrap: anywhere; max-width: 100%; }
+
 .answer-line {
   font-size: 14px;
   color: var(--ink);

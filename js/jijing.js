@@ -203,9 +203,9 @@
       '<p class="result-meta">' + (state.accent === 'uk' ? '英音' : '美音') + ' · ' +
       '自动识别金额、数量和号码；数字答案填写数字，编码按原文填写。</p>' +
       '<button class="btn replay-btn" data-jreplay>重听当前项</button>' +
-      (result ? '<div class="result-box ' + (result.accepted ? 'ok' : 'bad') + '"><p>' + esc(result.reasonCn) +
-        '</p><div class="highlight-line">' + result.highlightHtml + '</div><p>原文答案：<b>' + esc(item.answer) +
-        '</b></p><p>实际读法：' + esc(spoken(item).text) + '</p></div><button class="btn btn-primary" data-jnext>' +
+      (result ? '<div class="result-box ' + (result.accepted ? 'ok' : 'bad') + '">' +
+        global.DictationFeedback.render(session.input, item.answer, result, { kind: spoken(item).kind }) +
+        '<p>实际读法：' + esc(spoken(item).text) + '</p></div><button class="btn btn-primary" data-jnext>' +
         (session.index + 1 < session.ids.length ? '下一项' : '查看成绩') + '</button>' :
         '<label class="j-answer-label" for="jAnswer">写下听到的词、短语或数字</label>' +
         '<input class="input j-answer" id="jAnswer" maxlength="128" value="' + esc(session.input) +
@@ -223,7 +223,9 @@
         var item = items[id], record = saved.records[id];
         return '<article class="wrong-item"><div class="wrong-item-top"><b>' + esc(item.answer) + '</b><span class="wrong-tags">' +
           esc(label(dayOf[id])) + ' · ' + item.part + ' · ' + (record.errors ? '错 ' + record.errors + ' 次' : '手动标记') + '</span></div>' +
-          (record.lastReason ? '<p class="wrong-reason">' + esc(record.lastInput) + ' → ' + esc(item.answer) + '：' + esc(record.lastReason) + '</p>' : '') +
+          (typeof record.lastInput === 'string' ? global.DictationFeedback.render(record.lastInput, item.answer,
+            global.JijingSpeech.check(record.lastInput, item), { kind: spoken(item).kind }) :
+            record.lastReason ? '<p class="wrong-reason">' + esc(record.lastReason) + '</p>' : '') +
           '<div class="wrong-actions"><button class="speak-btn" data-jplay="' + id + '">播放</button>' +
           '<button class="btn btn-sm" data-jsingle="' + id + '">单项重练</button>' +
           '<button class="btn btn-sm" data-jmaster="' + id + '">已掌握</button></div></article>';
@@ -252,6 +254,8 @@
 
   app.addEventListener('click', function (event) {
     if (app.dataset.library !== 'jijing') return;
+    var comparison = event.target.closest('[data-feedback-play]');
+    if (comparison) { playText(comparison.getAttribute('data-feedback-play')); return; }
     if (event.target.closest('[data-jstop]')) { global.VocabAudio.stop(); return; }
     var target = event.target.closest('[data-jplay]');
     if (target) { play(items[target.dataset.jplay]); return; }
