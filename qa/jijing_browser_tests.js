@@ -120,7 +120,10 @@ function holdWordAudio() {
     await test(browser, 'existing pilot wrong-item history remains usable after extension', async page => {
       assert.equal(await page.locator('#jDay').inputValue(), '30');
       await page.locator('#mainTabs [data-route="wrong"]').click();
-      assert.match(await page.locator('.wrong-item').innerText(), /bak door → back door/);
+      assert.equal(await page.locator('.feedback-input').evaluate(element => {
+        var copy = element.cloneNode(true); copy.querySelectorAll('.feedback-missing').forEach(marker => marker.remove()); return copy.textContent;
+      }), 'bak door');
+      assert.equal(await page.locator('.feedback-answer').innerText(), 'back door');
       const before = await page.evaluate(() => JSON.parse(localStorage.getItem('ieltsJijing.v1')).records);
       await page.locator('#mainTabs [data-route="learn"]').click();
       await page.locator('#jDay').selectOption('101');
@@ -221,7 +224,10 @@ function holdWordAudio() {
       await page.locator('#mainTabs [data-route="wrong"]').click();
       assert.equal(await page.locator('.wrong-item').count(), 1);
       await page.reload();
-      assert.match(await page.locator('.wrong-item').innerText(), /bak door → back door/);
+      assert.equal(await page.locator('.feedback-input').evaluate(element => {
+        var copy = element.cloneNode(true); copy.querySelectorAll('.feedback-missing').forEach(marker => marker.remove()); return copy.textContent;
+      }), 'bak door');
+      assert.equal(await page.locator('.feedback-answer').innerText(), 'back door');
       await page.locator('[data-jmaster]').click();
       await page.locator('.panel summary').click();
       await page.locator('[data-junmaster]').click();

@@ -209,7 +209,7 @@
 
   /* ---------------- 错词本写入 ---------------- */
 
-  function addWrong(target, word, reasonCn) {
+  function addWrong(target, word, reasonCn, originalInput) {
     var key = target;
     var prev = store.wrong[key] || {
       headword: target, count: 0
@@ -222,6 +222,7 @@
     prev.scenarioId = word.scenarioId || prev.scenarioId || '';
     prev.scenario = word.scenario || prev.scenario || '';
     prev.lastReason = reasonCn || '';
+    if (typeof originalInput === 'string') prev.lastInput = originalInput;
     prev.updatedAt = Date.now();
     // 听写自动收录：与 ['spelling'] 取并集，手动标记的其他标签不被覆盖
     prev.reasonTags = orderedTags((prev.reasonTags || []).concat(['spelling']));
@@ -689,15 +690,10 @@
     if (s.result) {
       var res = s.result;
       var boxClass = res.accepted ? 'ok' : 'bad';
-      var reasonText = res.accepted
-        ? (res.exact ? '拼写正确' : res.reasonCn)
-        : res.reasonCn || '拼写有误';
       bodyHtml =
         '<div class="result-box ' + boxClass + '">' +
-          '<div class="result-reason">' + esc(reasonText) + '</div>' +
-          '<div class="highlight-line">' + res.highlightHtml + '</div>' +
-          '<div class="answer-line">正确答案：<b>' + esc(item.target) + '</b>' +
-            '　释义：' + esc(item.word.meaning || '—') +
+          DictationFeedback.render(s.submittedInput, item.target, res) +
+          '<div class="answer-line">释义：' + esc(item.word.meaning || '—') +
             (item.word.display ? '　词形：' + esc(item.word.display) : '') +
           '</div>' +
           '<div class="hw-line">' +
@@ -752,13 +748,14 @@
     var res = Dictation.check(raw, item.target);
     stopQuizAudio();
     s.result = res;
+    s.submittedInput = raw;
     s.answered++;
     if (res.accepted) {
       s.correct++;
       if (res.exact) s.exact++;
     } else {
       var isNew = !store.wrong[item.target];
-      addWrong(item.target, item.word, res.reasonCn);
+      addWrong(item.target, item.word, res.reasonCn, raw);
       if (isNew) s.wrongNew++;
     }
     renderDictation();
@@ -854,7 +851,9 @@
             '<span class="wrong-tags">p' + (e.page || '?') + ' · ' + esc(e.scenario || e.scenarioId || '') + '</span>' +
           '</div>' +
           '<div class="word-meaning">' + esc(e.display === e.headword ? e.meaning : (e.display + ' — ' + e.meaning)) + '</div>' +
-          (e.lastReason ? '<div class="wrong-reason">最近原因：' + esc(e.lastReason) + '</div>' : '') +
+          (typeof e.lastInput === 'string' ? DictationFeedback.render(e.lastInput, e.headword,
+            Dictation.check(e.lastInput, e.headword)) :
+            e.lastReason ? '<div class="wrong-reason">最近原因：' + esc(e.lastReason) + '</div>' : '') +
           '<div class="wrong-tags-row">' + reasonChipHtml(e, true) + '</div>' +
           '<div class="wrong-actions">' +
             '<button class="speak-btn" type="button" data-speak="' + esc(e.headword) + '" data-accent="uk">英</button>' +
@@ -953,6 +952,9 @@
 
   appEl.addEventListener('click', function (e) {
     var t;
+
+    t = e.target.closest('[data-feedback-play]');
+    if (t && appEl.dataset.library !== 'jijing') { speak(t.getAttribute('data-feedback-play'), state.dSetup.accent); return; }
 
     t = e.target.closest('[data-speak]');
     if (t) { speak(t.getAttribute('data-speak'), t.getAttribute('data-accent')); return; }
